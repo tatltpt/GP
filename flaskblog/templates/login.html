@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet/less" type="text/css" href="static/css/styles.less"/>
+  <link href="/static/css/login.css" />
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/less.min.js') }}"></script>
+  {% if title %}
+    <title>EXAS - {{ title }}</title>
+  {% else %}
+    <title>EXAS</title>
+  {% endif %}
+</head>
+<body>
+<div id="login-page">
+  <div class="login">
+    <h2 class="login-title">
+      <img src="static/imgs/logo3.png">
+    </h2>
+
+    <form class="form-login" method="post">
+      {{ form.hidden_tag() }}
+      <div class="form-group">
+        {{ form.username.label(class="form-control-label") }}
+        {% if form.username.errors %}
+          {{ form.username(class="form-control form-control-lg is-invalid") }}
+          <div class="invalid-feedback">
+            {% for error in form.username.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %}
+          {{ form.username(class="form-control form-control-lg") }}
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        {{ form.password.label(class="form-control-label") }}
+        {% if form.password.errors %}
+          {{ form.password(class="form-control form-control-lg is-invalid") }}
+          <div class="invalid-feedback">
+            {% for error in form.password.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %}
+          {{ form.password(class="form-control form-control-lg") }}
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        {{ form.remember() }}
+        {{ form.remember.label(class="form-control-label") }}
+      </div>
+
+      <div class="form-group">
+        {{ form.submit(class="btn-login") }}
+      </div>
+      <div class="footer">
+        <small> Bạn chưa có tài khoản? <a class="ml-2" href="{{ url_for('register') }}">Đăng ký ngay</a>
+        </small>
+      </div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

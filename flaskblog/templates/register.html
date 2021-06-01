@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet/less" type="text/css" href="static/css/styles.less" />
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/less.min.js') }}"></script>
+  {% if title %}
+  <title>EXAS - {{ title }}</title>
+  {% else %}
+  <title>EXAS</title>
+  {% endif %}
+</head>
+
+<body>
+  <div id="register-page">
+    <div class="register">
+      <h2 class="login-title">
+        <img src="static/imgs/logo3.png">
+      </h2>
+      <form method="POST" class="form-login">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          {{ form.username.label(class="form-control-label") }}
+          {% if form.username.errors %}
+          {{ form.username(class="form-control form-control-lg is-invalid") }}
+          <div class="invalid-feedback">
+            {% for error in form.username.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+          {% else %}
+          {{ form.username(class="form-control form-control-lg") }}
+          {% endif %}
+        </div>
+        <div class="form-group">
+          {{ form.email.label(class="form-control-label") }}
+          {% if form.email.errors %}
+          {{ form.email(class="form-control form-control-lg is-invalid") }}
+          <div class="invalid-feedback">
+            {% for error in form.email.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+          {% else %}
+          {{ form.email(class="form-control form-control-lg") }}
+          {% endif %}
+        </div>
+        <div class="form-group">
+          {{ form.password.label(class="form-control-label") }}
+          {% if form.password.errors %}
+          {{ form.password(class="form-control form-control-lg is-invalid") }}
+          <div class="invalid-feedback">
+            {% for error in form.password.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+          {% else %}
+          {{ form.password(class="form-control form-control-lg") }}
+          {% endif %}
+        </div>
+        <div class="form-group">
+          {{ form.confirm_password.label(class="form-control-label") }}
+          {% if form.confirm_password.errors %}
+          {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
+          <div class="invalid-feedback">
+            {% for error in form.confirm_password.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+          {% else %}
+          {{ form.confirm_password(class="form-control form-control-lg") }}
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          {{ form.submit(class="btn-login") }}
+        </div>
+        <div class="footer">
+          <small> Bạn đã có tài khoản? <a class="ml-2" href="{{ url_for('login') }}">Đăng nhập ngay</a>
+          </small>
+        </div>
+      </form>
+    </div>
+    <!-- <div class="border-top pt-3">
+    <small class="text-muted">
+      Already Have An Account? <a class="ml-2" href="{{ url_for('login') }}">Sign In</a>
+    </small>
+  </div> -->
+  </div>
+  <!--   Core JS Files   -->
+  <script src="static/assets/js/core/jquery.min.js"></script>
+  <script src="static/assets/js/material-dashboard.min.js?v=2.1.0" type="text/javascript"></script>
+  <!-- Sharrre libray -->
+  <script src="static/assets/demo/jquery.sharrre.js"></script>
+</body>
+
+</html>

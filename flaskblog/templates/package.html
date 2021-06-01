@@ -1,0 +1,240 @@
+{% extends "layout.html" %}
+{% block content %}
+  <style type="text/css">
+    table tr td {
+      padding: 10px 15px;
+    }
+
+    .custom-list {
+      font-size: 18px;
+      width: 300px;
+      padding: 20px 50px;
+      background-color: #46C0D2;
+      border-radius: 5px;
+      margin-bottom: 25px;
+    }
+
+    .modal-dialog {
+      max-width: 80%;
+    }
+
+    .upload__title {
+      font-size: 1.8rem;
+    }
+
+    .upload__subtitle {
+      font-size: 1.8rem;
+    }
+
+    .modified {
+      font-size: 1.5rem;
+    }
+
+    .preview__content {
+      min-height: 300px;
+      overflow: auto;
+    }
+  .preview__img {
+    width: 300px !important;
+    max-height: 350px;
+  }
+  </style>
+  <script>
+    var localData = {{ data | tojson }};
+  </script>
+  <div id="package" class="content">
+    <div class="container">
+      <div class="content__button">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+            <div class="row">
+              <div class="col-md-3 dropdown">
+                <button type="button" class="btn btn-custom btn-custom--secodary__color" v-on:click="openUpload()">
+                  <i class="material-icons">add_circle_outline</i>
+                  <span>新規</span>
+                </button>
+              </div>
+              <div class="col-md-3">
+                <button type="button" class="btn btn-md btn-custom btn-custom--secodary__color" @click="startProcess()">
+                  <img src="{{ url_for('static', filename='imgs/shape2.png' ) }}" alt=""/>
+                  <span>実行</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="content__table">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card--transparent" style="margin-bottom: 0!important;">
+              <div class="card-body p-0">
+                <div class="toolbar">
+                </div>
+                <div class="material-datatables" style="height: 650px; margin-bottom: 10px">
+                  <table id="datatables" class="table table-striped table-no-bordered table-hover" cellspacing="0"
+                         style="width:100%">
+                    <thead>
+                    <tr>
+                      <th class="text-center">ファイル名</th>
+                      <th class="text-center" style="width: 40%">上カメラ</th>
+                      <th class="text-center" style="width: 40%">横カメラ</th>
+                      <th class="text-center" style="width: 5%"></th>
+                    </tr>
+                    </thead>
+                    <tbody v-if="items.length > 0">
+                    <tr v-for="d in items" :class="d.view_status ? 'font-weight-normal' : 'font-weight-bold'">
+                      <td class=" td__content text-center" style="max-width: 300px">
+                        <span class="td__content-text">
+                          {% raw %}{{d.name}}{% endraw %}
+                        </span>
+                      </td>
+                      <td class=" td__content text-center">
+                        <img :src="'{{ url_for('static', filename='uploaded/' ) }}' + d.img1" style="width: 100%">
+                      </td>
+                      <td class="td__content text-center">
+                        <img :src="'{{ url_for('static', filename='uploaded/' ) }}' + d.img2" style="width: 100%">
+                      </td>
+                      <td>
+                        <button class="btn btn-danger" @click="deleteItem(d.id)">
+                          <i class="material-icons">delete_outline</i>
+                        </button>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="upload-item" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">
+                <span aria-hidden="true">×</span>
+                <span class="sr-only">Close</span>
+              </button>
+            </div>
+            <div class="row">
+              <div class="form-group" style="margin: auto">
+                <label>Item name</label>
+                <input id="item-name" type="text" class="form-control form-inline" v-model="itemName" :class="error ? 'is-invalid' : ''" required>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6" style="text-align: center">
+                <h2 style="font-weight: bold; color: #086799">上カメラ</h2>
+                <div v-if="file1 && file1 != null" class="preview__content">
+                  <table style="width: 80%; margin: auto;">
+                    <tr>
+                      <td>
+                        <img class="preview__img" :src="file1.url" :alt="file1.file.name"
+                             onError="this.onerror=null; this.src='static/imgs/pdf.jpg';">
+                      </td>
+                      <td>
+                        <button type="button" class="btn btn-md btn-danger" style="padding: 10px 15px"
+                                @click="deleteImg1()">
+                          <i class="material-icons" style="font-size: 2rem !important;">delete_outline</i>
+                        </button>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <div v-else id="upload-content-1" class="card-body" @drop.prevent="fileDropHover1"
+                     @dragover.prevent="fileDragHover1" @dragleave.prevent="fileDragHover1">
+                  <div class="upload__content">
+                    <div href="#">
+                      <img src="{{ url_for('static', filename='imgs/shap6.png') }}" alt=""/>
+                    </div>
+                    <h2 class="upload__title">
+                      帳票などファイルをドロップする
+                    </h2>
+                    <h2 class="upload__subtitle">
+                      または
+                    </h2>
+                    <div class="upload__icon" style="cursor: pointer" v-on:click="selectFile1()">
+                      <img src="{{ url_for('static', filename='imgs/combine.png') }}" alt=""/>
+                    </div>
+                    <input type="file" id="files1" ref="files1" v-on:change="handleFilesUpload($event)" hidden multiple
+                           accept="image/*, application/pdf"/>
+                    <div class="upload__description text-center">
+                      <span class="modified">PDF・JPEG・JPG・PNG</span>
+                      <div class="flex justify-content-center align-items-center">
+                        <div class="row">
+                          <div class="col-md-2"></div>
+                          <div class="col-md-8">
+                            <span class="text-center">複数の画像をアップロード可能 20MB 以内</span>
+                          </div>
+                          <div class="col-md-2"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" style="text-align: center">
+                <h2 style="font-weight: bold; color: #086799">横カメラ</h2>
+                <div v-if="file2 && file2 != null" class="preview__content">
+                  <table style="width: 80%; margin: auto;">
+                    <tr>
+                      <td>
+                        <img class="preview__img" :src="file2.url" :alt="file2.file.name"
+                             onError="this.onerror=null; this.src='static/imgs/pdf.jpg';">
+                      </td>
+                      <td>
+                        <button type="button" class="btn btn-md btn-danger" style="padding: 10px 15px"
+                                @click="deleteImg2()">
+                          <i class="material-icons" style="font-size: 2rem !important;">delete_outline</i>
+                        </button>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <div v-else id="upload-content-2" class="card-body" @drop.prevent="fileDropHover2"
+                     @dragover.prevent="fileDragHover2" @dragleave.prevent="fileDragHover2">
+                  <div class="upload__content">
+                    <div href="#">
+                      <img src="{{ url_for('static', filename='imgs/shap6.png') }}" alt=""/>
+                    </div>
+                    <h2 class="upload__title">
+                      帳票などファイルをドロップする
+                    </h2>
+                    <h2 class="upload__subtitle">
+                      または
+                    </h2>
+                    <div class="upload__icon" style="cursor: pointer" v-on:click="selectFile2()">
+                      <img src="{{ url_for('static', filename='imgs/combine.png') }}" alt=""/>
+                    </div>
+                    <input type="file" id="files2" ref="files2" v-on:change="handleFilesUpload($event)" hidden
+                           accept="image/*, application/pdf"/>
+                    <div class="upload__description text-center">
+                      <span class="modified">PDF・JPEG・JPG・PNG</span>
+                      <div class="flex justify-content-center align-items-center">
+                        <div class="row">
+                          <div class="col-md-2"></div>
+                          <div class="col-md-8">
+                            <span class="text-center">複数の画像をアップロード可能 20MB 以内</span>
+                          </div>
+                          <div class="col-md-2"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-success" @click="upload()">ウプロド</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/package.js') }}?v=20"></script>
+{% endblock content %}
