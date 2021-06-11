@@ -110,24 +110,3 @@ class Bib(db.Model):
 
     def __repr__(self):
         return f"Bib('{self.id}', '{self.bib_feature}', '{self.image_id}', '{self.created_at}', '{self.updated_at}')"
-
-# class Item(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(100), nullable=False)
-#     image1 = db.Column(db.String(100), nullable=False)
-#     image2 = db.Column(db.String(100), nullable=False)
-#     output1 = db.Column(db.String(1000), nullable=True)
-#     output2 = db.Column(db.String(1000), nullable=True)
-#     type = db.Column(db.String(100), nullable=True)
-#     result = db.Column(db.Text, nullable=True)
-#     status = db.Column(db.Integer, nullable=False, default=0)
-#     view_status = db.Column(db.Boolean, default=False)
-#     created_at = db.Column(db.DateTime, nullable=False,
-#                            default=datetime.utcnow)
-#     created_ip = db.Column(db.String(20), nullable=False)
-#     deleted_at = db.Column(db.DateTime, nullable=True)
-#     pkg_id = db.Column(db.Integer, db.ForeignKey(
-#         'package.id', ondelete="CASCADE"), nullable=False)
-
-#     def __repr__(self):
-#         return f"Item('{self.id}', '{self.raw_path}', '{self.image1}', '{self.image2}', '{self.result}', '{self.type}', '{self.view_status}', '{self.created_at}')"

@@ -10,12 +10,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 db.init_app(app)
 
-# socketio = SocketIO(app, async_mode="threading", logger=True, engineio_logger=True, pingInterval=3000)
-
-# with app.app_context():
-#     from flaskblog import routes
-#     db.create_all()
-
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'

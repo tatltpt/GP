@@ -19,9 +19,11 @@ from sqlalchemy import and_, or_
 from bs4 import BeautifulSoup
 import urllib
 import time
-import os
 import requests
 from selenium import webdriver
+import re
+import keras_ocr
+from slugify import slugify
 
 app.config['ALLOWED_EXTENSIONS'] = set(
     ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'zip', 'csv', 'tiff'])
@@ -40,6 +42,7 @@ sln_options.add_argument('--headless')
 sln_options.add_argument('--no-sandbox')
 sln_options.add_argument('--disable-dev-shm-usage')
 
+pipeline = keras_ocr.pipeline.Pipeline()
 
 def create_uuid():
     random.seed(datetime.datetime.now())
@@ -150,7 +153,30 @@ def get_link_image():
             al.status = 1
             db.session.commit()
             flash('Tạo image thành công', 'success')
-    
+
+def bib_predict():
+    images = Image.query.filter(Image.album_id == 44).all()
+    for image in images:
+        image_url = [keras_ocr.tools.read(image.image_url)]
+        predictions = pipeline.recognize(image_url)
+        for idx, prediction in enumerate(predictions):
+            bibs = ''
+            for word, array in prediction:
+              tmp = re.compile(r"\b[0-9]{1,7}\b|\b[a-z][0-9]{2,}\b").findall(word)
+              if (tmp != []):
+                bib = tmp.pop()
+                bibs = bib +' '+ bibs
+        b = Bib(bib_feature=bibs, image_id = image.id)
+        db.session.add(b)
+        db.session.commit()
+    flash('Đọc số BIB thành công', 'success')
+
+@app.route("/bib_predict", methods=['GET', 'POST'])
+# @login_required
+def predict():
+    if request.method == 'POST':
+        bib_predict()
+    return render_template('admin/bib_predict.html')
 
 def update_sql(data):
     formats = Format.query.filter().all()
@@ -209,29 +235,60 @@ def start_extract(data):
             d['result'] = None
     update_sql(data)
 
-
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 @login_required
 def home():
+    if request.method == "GET":
+        if(request.args):
+            if "bib" in request.args.keys():
+                bib = request.args.get('bib')
+                search = "%{}%".format(bib)
+                albums = Album.query.filter(Album.event_id == 4).all()
+                eventname = Event.query.filter_by(id = 4).first()
+                images = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).all()
+                count = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).count()
+                total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
+                return render_template('home.html', images=images, eventname=eventname, count=count, bib=bib, total=total)
     albums = Album.query.filter(Album.event_id == 4).all()
     images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).all()
     eventname = Event.query.filter_by(id = 4).first()
-    count = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
-    # res = []
-    # for data in images:
-    #     r = {
-    #         'id': data.id,
-    #         'image_url': data.image_url,
-    #     }
-    #     res.append(r)
+    total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
+    if request.method == "POST":
+        if "img" in request.files:
+            uploaded_file = request.files["img"]
+            uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
+            uploaded_file.save(uploaded_file_path)
+            uploaded_file_path
+ 
+    return render_template('home.html', images=images, eventname=eventname, total=total)
 
-    # return render_template('bibpix.html', data={'data': res})
-    return render_template('bibpix.html', images=images, eventname=eventname, count=count)
-
-@app.route("/about")
+@app.route("/<string:slug>", methods=['GET', 'POST'])
 @login_required
-def about():
-    return render_template('about.html', title='About')
+def detail():
+    if request.method == "GET":
+        if(request.args):
+            if "bib" in request.args.keys():
+                bib = request.args.get('bib')
+                search = "%{}%".format(bib)
+                albums = Album.query.filter(Album.event_id == 4).all()
+                eventname = Event.query.filter_by(id = 4).first()
+                images = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).all()
+                count = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).count()
+                total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
+                return render_template('home.html', images=images, eventname=eventname, count=count, bib=bib, total=total)
+    albums = Album.query.filter(Album.event_id == 4).all()
+    images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).all()
+    eventname = Event.query.filter_by(id = 4).first()
+    total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
+    if request.method == "POST":
+        if "img" in request.files:
+            uploaded_file = request.files["img"]
+            uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
+            uploaded_file.save(uploaded_file_path)
+            uploaded_file_path
+ 
+    return render_template('home.html', images=images, eventname=eventname, total=total)
+
 
 @app.route("/index1")
 @login_required
@@ -293,13 +350,8 @@ def ajaxfile():
     except Exception as e:
         print(e)
 
-@app.route("/bibpix")
-def bibpix(page_num):
-    image = Image.query.paginate(per_page=5, page=page_num, error_out=True)
-    return render_template('bibpix.html', title='Bibpix')
-
-@app.route("/races")
-def races():
+@app.route("/events")
+def events():
     events = Event.query.filter().all()
     res = []
     for event in events:
@@ -311,9 +363,10 @@ def races():
             'place': event.place,
             'description': event.description,
             'image': image.image_url,
+            'url' : slugify(event.eventname),
         }
         res.append(r)
-    return render_template('races.html', title='races', res=res)
+    return render_template('events.html', title='events', res=res)
 
 @app.route("/profile")
 @login_required
@@ -358,23 +411,14 @@ def create_event():
 def create_album():
     if request.method == 'POST':
         get_link_album()
-    return render_template('create_album.html')
-    # form = AlbumForm()
-    # if form.validate_on_submit():
-    #     album = Album(albumname=form.albumname.data,
-    #                 album_url=form.album_url.data,user_id = 1, event_id = 1)
-    #     db.session.add(album)
-    #     db.session.commit()
-    #     flash('Tạo album thành công', 'success')
-    #     return redirect(url_for('create_album'))
-    # return render_template('create_album.html', title='create_album', form=form)
+    return render_template('admin/create_album.html')
 
 @app.route("/crawl_image", methods=['GET', 'POST'])
 # @login_required
 def crawl_image():
     if request.method == 'POST':
         get_link_image()
-    return render_template('crawl_image.html')
+    return render_template('admin/crawl_image.html')
 
 
 
@@ -392,53 +436,6 @@ def login():
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
-
-
-@app.route("/history", methods=['GET', 'POST'])
-@login_required
-def history():
-    post = Package.query.filter(Package.user_id.in_([current_user.id])).all()
-    results = Item.query.filter(Item.post_id.in_([p.id for p in post])).all()
-    res = []
-    for data in results:
-        r = {
-            'id': data.id,
-            'name': data.name,
-            'raw_path': data.raw_path,
-            'output_path': data.output_path,
-            'type': data.type,
-            'result': json.loads(data.result) if data.result is not None else None,
-            'status': data.status,
-            'correct_result': data.correct_result,
-            'view_status': data.view_status,
-            'created_at': data.created_at,
-        }
-        res.append(r)
-
-    return render_template('history.html', data={'data': res})
-
-
-@app.route("/detail", methods=['GET', 'POST'])
-@login_required
-def detail():
-    post = Package.query.filter(Package.user_id.in_([current_user.id])).all()
-    results = Item.query.filter(Item.post_id.in_([p.id for p in post])).all()
-    res = []
-    for data in results:
-        r = {
-            'id': data.id,
-            'name': data.name,
-            'raw_path': data.raw_path,
-            'output_path': data.output_path,
-            'type': data.type,
-            'result': json.loads(data.result) if data.result is not None else None,
-            'status': data.status,
-            'correct_result': data.correct_result,
-            'view_status': data.view_status,
-            'created_at': data.created_at,
-        }
-        res.append(r)
-    return render_template('detail.html', data=res)
 
 
 @app.route("/update_template/<id>")
@@ -534,34 +531,7 @@ def rename_template():
     return redirect(url_for('templates'))
 
 
-@app.route("/export", methods=['POST'])
-@login_required
-def export():
-    import xlwt
-    if request.method == 'POST':
-        if 'data' in request.form:
-            data = request.form['data'].split(',')
-            obj = Item.query.filter(Item.id.in_(data)).all()
-            book = xlwt.Workbook(encoding="utf-8")
-            path = datetime.datetime.now().strftime("%Y%m%d_%H%M%S%f") + '.xls'
-            for d in obj:
-                if d.result is not None:
-                    name = d.name
-                    if len(d.name) > 30:
-                        name = name[:30]
-                    sheet = book.add_sheet(name)
-                    sheet.write(0, 0, "ID")
-                    sheet.write(0, 1, "Text")
-                    sheet.write(0, 2, "Probability")
-                    i = 1
-                    res = json.loads(d.result)
-                    for x in res['raw']['result']:
-                        sheet.write(i, 0, x['id'])
-                        sheet.write(i, 1, x['text'])
-                        sheet.write(i, 2, x['prob'])
-                        i += 1
-            book.save(os.path.join(UPLOAD_DIR, path))
-            return jsonify({'path': '/static/uploaded/' + path})
+
 
 
 @app.route("/save_export", methods=['POST'])

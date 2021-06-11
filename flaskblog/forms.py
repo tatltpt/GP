@@ -1,9 +1,10 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextField, DateField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flaskblog.models import User
+from wtforms.fields.html5 import DateField
 
 
 class RegistrationForm(FlaskForm):
@@ -31,7 +32,7 @@ class EventForm(FlaskForm):
     date = DateField('Thời gian',format='%d/%m/%Y')
     place = StringField('Địa điểm')
     description = StringField('Mô tả')
-    submit = SubmitField('Đăng ký')
+    submit = SubmitField('Tạo sự kiện')
 
 class AlbumForm(FlaskForm):
     albumname = StringField('Tên album', validators=[DataRequired()])
@@ -66,7 +67,7 @@ class UpdateAccountForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     phone = StringField('Điện thoại', validators=[DataRequired(), Length(min=2, max=20)])
-    submit = SubmitField('Update')
+    submit = SubmitField('Cập nhật')
 
     def validate_username(self, username):
         if username.data != current_user.username:

@@ -108,7 +108,7 @@
   }
 
   body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
     font-size: 14px;
     line-height: 1.42857143;
     color: #333;
@@ -294,81 +294,6 @@
     }
   }
 
-  .btn {
-    display: inline-block;
-    padding: 6px 12px;
-    margin-bottom: 0;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.42857143;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    -ms-touch-action: manipulation;
-    touch-action: manipulation;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    background-image: none;
-    border: 1px solid transparent;
-    border-radius: 4px;
-  }
-
-  .btn:active:focus,
-  .btn:focus {
-    outline: 5px auto -webkit-focus-ring-color;
-    outline-offset: -2px;
-  }
-
-  .btn:focus,
-  .btn:hover {
-    color: #333;
-    text-decoration: none;
-  }
-
-  .btn:active {
-    background-image: none;
-    outline: 0;
-    -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
-    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
-  }
-
-  .btn-default {
-    color: #333;
-    background-color: #fff;
-    border-color: #ccc;
-  }
-
-  .btn-default:focus {
-    color: #333;
-    background-color: #e6e6e6;
-    border-color: #8c8c8c;
-  }
-
-  .btn-default:hover {
-    color: #333;
-    background-color: #e6e6e6;
-    border-color: #adadad;
-  }
-
-  .btn-default:active {
-    color: #333;
-    background-color: #e6e6e6;
-    border-color: #adadad;
-  }
-
-  .btn-default:active:focus,
-  .btn-default:active:hover {
-    color: #333;
-    background-color: #d4d4d4;
-    border-color: #8c8c8c;
-  }
-
-  .btn-default:active {
-    background-image: none;
-  }
 
   .fade {
     opacity: 0;
@@ -620,9 +545,7 @@
 
   body {
     height: 100%;
-    background: #f1f1f1;
-    background: -webkit-linear-gradient(139deg, #f1f1f1, #e1e1e1 39%, #d1d1d1 68%, #d1d1d1) fixed;
-    background: linear-gradient(139deg, #f1f1f1, #e1e1e1 39%, #d1d1d1 68%, #d1d1d1) fixed;
+    background-color: #fbfbfb;
   }
 
   h4 {
@@ -631,7 +554,6 @@
   }
 
   * {
-    font-family: Montserrat, Arial, sans-serif;
     outline: none !important;
   }
 
@@ -720,24 +642,6 @@
     background-color: #ffffff !important;
   }
 
-  .btn {
-    border-radius: 3px;
-    outline: none !important;
-    font-size: 14px;
-  }
-
-  .btn-default {
-    color: #ffffff !important;
-  }
-
-  .btn-default,
-  .btn-default:hover,
-  .btn-default:focus,
-  .btn-default:active {
-    background-color: #5fbeaa !important;
-    border: 1px solid #5fbeaa !important;
-  }
-
   ul {
     list-style-type: none;
     margin: 0;
@@ -761,131 +665,6 @@
   .main-content {
     padding-top: 56px;
     padding-bottom: 56px;
-  }
-
-  header .navbar-fixed-top {
-    padding: 15px 0 0 0;
-    height: 56px;
-    box-shadow: inset 0 -1px 0 0 #dfe3e8;
-    background-color: #fff;
-    z-index: 777777;
-  }
-
-  header .container .menu-left li {
-    display: inline-block;
-    top: -3px;
-  }
-
-  header .container .menu-left li .icon {
-    width: 24px;
-  }
-
-  header .container .menu-left li a {
-    color: #333;
-    text-transform: capitalize;
-    padding: 5px 20px;
-  }
-
-  header .container .menu-left li ul {
-    min-width: auto;
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-  }
-
-  header .container .menu-left li .menu-language {
-    top: 30px;
-    right: 12px;
-  }
-
-  header .container .menu-left li .icon-language {
-    position: relative;
-    top: 2px;
-    cursor: pointer;
-  }
-
-  header .container .menu-left li .icon-search-header {
-    font-size: 16px;
-    position: relative;
-    user-select: none;
-    cursor: pointer;
-  }
-
-  header .container .menu-center {
-    font-weight: 500;
-    font-size: 16px;
-  }
-
-  @media screen and (max-width: 767px) {
-    header .container .menu-center {
-      font-size: 13px;
-      padding: 0;
-      position: relative;
-      top: 2px;
-    }
-  }
-
-  @media screen and (max-width: 767px) {
-    header .container .menu-right {
-      padding-left: 0;
-    }
-
-    header .container .menu-right a {
-      font-size: 14px;
-      position: relative;
-      top: 2px;
-    }
-  }
-
-  header .container .icon {
-    max-width: 24px;
-  }
-
-  .icon-menu-header .ant-btn {
-    display: inline-block;
-    margin-bottom: 0;
-    font-weight: 500;
-    text-align: center;
-    touch-action: manipulation;
-    cursor: pointer;
-    background-image: none;
-    border: 1px solid transparent;
-    white-space: nowrap;
-    line-height: 1.15;
-    padding: 0 15px;
-    font-size: 14px;
-    border-radius: 4px;
-    height: 28px;
-    user-select: none;
-    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-    position: relative;
-    color: rgba(0, 0, 0, 0.65);
-    background-color: #fff;
-    border-color: #d9d9d9;
-  }
-
-  .icon-menu-header .dashboard-md-menu {
-    display: inline-block !important;
-    padding-left: 0px !important;
-  }
-
-  .icon-menu-header .dashboard-md-menu .btn-menu-icon {
-    width: 24px;
-  }
-
-  .icon-menu-header .menu-content {
-    min-width: 250px !important;
-    top: 30px;
-  }
-
-  .icon-menu-header .menu-content li {
-    padding: 5px 0px;
-    width: 100%;
-  }
-
-  .icon-menu-header .menu-content li :hover {
-    background-color: transparent !important;
-    color: red !important;
   }
 
   .modal-full-scrren {
@@ -966,202 +745,6 @@
     border: none;
     cursor: pointer;
     color: #fff;
-  }
-
-  .modal-full-scrren .search-result {
-    width: 100%;
-    margin: 0;
-    text-align: left;
-    background-color: #fff;
-    margin-top: 5px;
-    float: left;
-    display: none;
-  }
-
-  footer {
-    position: fixed;
-    width: 100%;
-    bottom: -1px;
-    height: 56px;
-    left: 0;
-    width: 100%;
-    background-color: #fff;
-    z-index: 2;
-    border-top: 1px solid #dfe3e8;
-  }
-
-  footer .container {
-    padding: 0;
-  }
-
-  footer .container ul {
-    margin: 0;
-    padding: 0;
-    padding-top: 8px;
-  }
-
-  footer .container ul li {
-    display: inline-block;
-    width: 20%;
-    float: left;
-    text-align: center;
-  }
-
-  footer .container ul li img {
-    width: 24px;
-    height: 24px;
-    border: 0;
-  }
-
-  @media screen and (max-width: 350px) {
-    footer .container ul li img {
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  footer .container ul li span {
-    display: inline-block;
-    width: 100%;
-    font-size: 12px;
-    color: #637381;
-  }
-
-  @media screen and (max-width: 350px) {
-    footer .container ul li span {
-      font-size: 11px;
-    }
-  }
-
-  footer .container ul .img-logo {
-    width: 40px;
-    height: 40px;
-  }
-
-  .modal-irace-chatbot.modal-irace {
-    position: fixed;
-    z-index: 999;
-    right: -120px;
-    bottom: 53px;
-    opacity: 0;
-    visibility: hidden;
-    transform: scale(1.1);
-    transition: visibility 0s linear .25s, opacity .25s 0s, transform .25s;
-  }
-
-  .modal-irace-chatbot .modal-content {
-    position: absolute;
-    bottom: 35px;
-    right: 30px;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 1rem 1.5rem;
-    width: 33rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 2px 99px -32px #888887;
-  }
-
-  .modal-irace-chatbot .close-button {
-    float: left;
-    width: 1.5rem;
-    line-height: 1.5rem;
-    text-align: center;
-    cursor: pointer;
-    border-radius: 1.25rem;
-    background-color: lightgray;
-  }
-
-  .modal-irace-chatbot .close-button:hover {
-    background-color: darkgray;
-  }
-
-  .modal-irace-chatbot .noidungchat {
-    margin-top: -20px;
-    padding-left: 30px;
-    padding-top: 20px;
-    width: 77%;
-    font-size: 16px;
-    color: black;
-  }
-
-  .modal-irace-chatbot .trochuyenngay {
-    color: green;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-  }
-
-  .modal-irace-chatbot .iconchat {
-    position: absolute;
-    right: 15px;
-    top: 1px;
-  }
-
-  @media (min-width: 320px) and (max-width: 480px) {
-    .modal-irace-chatbot .modal-content {
-      right: -20px !important;
-      width: 33rem !important;
-      bottom: 10px !important;
-    }
-  }
-
-  #irace-chatbot .clssimg,
-  #irace-chatbot .clss2 {
-    opacity: 0;
-    animation-name: bounceIn;
-    animation-duration: 450ms;
-    animation-timing-function: linear;
-    animation-fill-mode: forwards;
-  }
-
-  #irace-chatbot .clssimg {
-    animation-delay: 2s;
-    cursor: pointer;
-  }
-
-  #irace-chatbot .clss2 {
-    animation-delay: 3s;
-  }
-
-  @media (min-width: 320px) and (max-width: 480px) {
-    #irace-chatbot .clssimg {
-      width: 60px;
-    }
-  }
-
-  #irace-chatbot .popupchat {
-    position: fixed;
-    bottom: 75px;
-    right: 20px;
-    z-index: 3;
-  }
-
-  @media screen and (max-width: 767px) {
-    #irace-chatbot .popupchat {
-      bottom: 60px;
-      right: 5px;
-    }
-  }
-
-  #irace-chatbot .nochatbot {
-    background: red;
-    width: 25px;
-    height: 25px;
-    color: white;
-    border-radius: 50%;
-    line-height: 25px;
-    font-size: 11px;
-    right: 75px;
-    bottom: 110px;
-    position: fixed;
-    text-align: center;
-  }
-
-  @media screen and (max-width: 767px) {
-    #irace-chatbot .nochatbot {
-      right: 45px;
-      bottom: 95px;
-    }
   }
 
   #modal-activity-image .modal-content {
@@ -1430,6 +1013,7 @@
     background-color: #fff;
     border-radius: 10px;
     height: 100%;
+    border: 1px solid #dee2e6;
   }
 
   @media screen and (max-width: 767px) {
@@ -1707,271 +1291,80 @@
   <div class="races">
     <div class="container">
       <div class="box-wrapper">
-        <!-- <div class="box-item bg-white">
-          <p class="box-title">Sự kiện nổi bật</p>
-          <div class="owl-carousel owl-race-hot owl-loaded owl-drag">
-            <div class="owl-stage-outer">
-              <div class="owl-stage"
-                style="transform: translate3d(-6660px, 0px, 0px); transition: all 0.25s ease 0s; width: 17760px;">
-                <div class="owl-item cloned" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/phone-off-shoes-on" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2020/11/5fa39ed9006be.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Phone Off Shoes On</p>
-                        <p class="race-desc">Lan tỏa tinh thần thể thao tích cực giảm thời gian sử dụng điện thoại và
-                          xỏ giày chạy bộ xây dựng thói quen rèn luyện sức khỏe trong 21 ngày</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item cloned" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/runderful-year" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2020/12/5fe16bca42ca0.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Runderful Year</p>
-                        <p class="race-desc">Cùng iRace tham gia sự kiện cuối năm 2020, nạp đầy năng lượng sẵn sàng
-                          cho năm mới 2021 đầy hứng khởi. Còn chần chờ gì nữa buộc dây giày và CHẠY VỀ ĐÍCH nào!</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item cloned" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/time-to-run" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2020/10/5f7e7fb7c1c98.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Time To Run</p>
-                        <p class="race-desc">Không có thời điểm nào tốt hơn BÂY GIỜ để bắt đầu quan tâm đến SỨC KHOẺ
-                          của chính bạn. Hãy xỏ giày chạy cùng iRace ngay hôm nay!</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item cloned" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/ride-to-inspire" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2020/09/5f71efd5007dd.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Ride To Inspire - ĐẠP XE LAN TỎA TINH THẦN THỂ THAO</p>
-                        <p class="race-desc">Sự kiện đạp xe trực tuyến "Ride To Inspire" ra đời, nhằm mang đến cho bạn
-                          một sân chơi mới để bạn có động lực tập luyện thể thao thường xuyên. Bên cạnh đó chính hoạt
-                          động này của bạn sẽ góp phần vào việc lan tỏa tinh thần thể thao đến những người xung quanh.
-                        </p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/ra-sun-god-gods-of-egypt" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2021/04/607d4bec58d0a.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Ra - Thần Mặt Trời | Gods Of Egypt</p>
-                        <p class="race-desc">Chuỗi sự kiện "Gods of Egypt" sẽ cùng bạn khám phá thế giới của 6 vị thần
-                          có ảnh hưởng lớn nhất đến người dân Ai Cập. Trong đó, Ra - Thần Mặt Trời sẽ là vị thần đầu
-                          tiên chờ bạn khám phá.</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/one-on-one-run" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2021/02/60376549025bf.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">One-on-One Run</p>
-                        <p class="race-desc">Thử thách " 1 CHỌI 1 - Chiến đấu với chính mình", xác lập mục tiêu và
-                          chiến thắng với con quỷ lười biếng bên trong bạn đây chính là chiến thắng hiển hách nhất.
-                        </p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item active" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/kaizen-challenge" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2021/02/6035c26c7afe9.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Kaizen Challenge</p>
-                        <p class="race-desc">Kaizen Challenge lan tỏa thông điệp "Change For The Better - Thay Đổi Để
-                          Tốt Hơn" Bắt đầu từ việc rèn luyện sức khỏe bằng cách đi bộ/chạy bộ trong 30 ngày.</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/combo-tu-linh" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2021/03/605b13de07be8.png)"></div>
-                      <div class="race-text">
-                        <p class="race-title">Combo Tứ Linh</p>
-                        <p class="race-desc">CHẠY CÀNG NHIỀU GIÁ CÀNG ƯU ĐÃI - Với đăng ký combo 4 sự kiện bạn sẽ được
-                          nhận ưu đãi giảm 10%, quá tuyệt vời phải không nào?</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/phone-off-shoes-on" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2020/11/5fa39ed9006be.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Phone Off Shoes On</p>
-                        <p class="race-desc">Lan tỏa tinh thần thể thao tích cực giảm thời gian sử dụng điện thoại và
-                          xỏ giày chạy bộ xây dựng thói quen rèn luyện sức khỏe trong 21 ngày</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/runderful-year" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2020/12/5fe16bca42ca0.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Runderful Year</p>
-                        <p class="race-desc">Cùng iRace tham gia sự kiện cuối năm 2020, nạp đầy năng lượng sẵn sàng
-                          cho năm mới 2021 đầy hứng khởi. Còn chần chờ gì nữa buộc dây giày và CHẠY VỀ ĐÍCH nào!</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/time-to-run" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2020/10/5f7e7fb7c1c98.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Time To Run</p>
-                        <p class="race-desc">Không có thời điểm nào tốt hơn BÂY GIỜ để bắt đầu quan tâm đến SỨC KHOẺ
-                          của chính bạn. Hãy xỏ giày chạy cùng iRace ngay hôm nay!</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/ride-to-inspire" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2020/09/5f71efd5007dd.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Ride To Inspire - ĐẠP XE LAN TỎA TINH THẦN THỂ THAO</p>
-                        <p class="race-desc">Sự kiện đạp xe trực tuyến "Ride To Inspire" ra đời, nhằm mang đến cho bạn
-                          một sân chơi mới để bạn có động lực tập luyện thể thao thường xuyên. Bên cạnh đó chính hoạt
-                          động này của bạn sẽ góp phần vào việc lan tỏa tinh thần thể thao đến những người xung quanh.
-                        </p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item cloned" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/ra-sun-god-gods-of-egypt" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2021/04/607d4bec58d0a.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Ra - Thần Mặt Trời | Gods Of Egypt</p>
-                        <p class="race-desc">Chuỗi sự kiện "Gods of Egypt" sẽ cùng bạn khám phá thế giới của 6 vị thần
-                          có ảnh hưởng lớn nhất đến người dân Ai Cập. Trong đó, Ra - Thần Mặt Trời sẽ là vị thần đầu
-                          tiên chờ bạn khám phá.</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item cloned" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/one-on-one-run" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2021/02/60376549025bf.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">One-on-One Run</p>
-                        <p class="race-desc">Thử thách " 1 CHỌI 1 - Chiến đấu với chính mình", xác lập mục tiêu và
-                          chiến thắng với con quỷ lười biếng bên trong bạn đây chính là chiến thắng hiển hách nhất.
-                        </p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item cloned" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/kaizen-challenge" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2021/02/6035c26c7afe9.jpeg)">
-                      </div>
-                      <div class="race-text">
-                        <p class="race-title">Kaizen Challenge</p>
-                        <p class="race-desc">Kaizen Challenge lan tỏa thông điệp "Change For The Better - Thay Đổi Để
-                          Tốt Hơn" Bắt đầu từ việc rèn luyện sức khỏe bằng cách đi bộ/chạy bộ trong 30 ngày.</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-                <div class="owl-item cloned" style="width: 1110px;">
-                  <div class="race-loop">
-                    <a href="https://irace.vn/races/combo-tu-linh" class="link">
-                      <div class="banner"
-                        style="background-image: url(https://irace.vn/races/uploads/2021/03/605b13de07be8.png)"></div>
-                      <div class="race-text">
-                        <p class="race-title">Combo Tứ Linh</p>
-                        <p class="race-desc">CHẠY CÀNG NHIỀU GIÁ CÀNG ƯU ĐÃI - Với đăng ký combo 4 sự kiện bạn sẽ được
-                          nhận ưu đãi giảm 10%, quá tuyệt vời phải không nào?</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="owl-nav"><span class="owl-prev"><img
-                  src="https://irace.vn/races/images/icon-left.png"></span><span class="owl-next"><img
-                  src="https://irace.vn/races/images/icon-right.png"></span></div>
-            <div class="owl-dots"><button role="button" class="owl-dot"><span></span></button><button role="button"
-                class="owl-dot"><span></span></button><button role="button"
-                class="owl-dot active"><span></span></button><button role="button"
-                class="owl-dot"><span></span></button><button role="button"
-                class="owl-dot"><span></span></button><button role="button"
-                class="owl-dot"><span></span></button><button role="button"
-                class="owl-dot"><span></span></button><button role="button" class="owl-dot"><span></span></button>
-            </div>
-          </div>
-        </div> -->
+        <style>
+          .search-form .form-control,
+          .search-form button,
+          .search-form .button {
+            font-size: 14px;
+            height: 36px !important;
+            line-height: 24px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            margin-right: 10px;
+          }
 
-        <div class="box-search clearfix">
+          .search-form .button {
+            margin: 0;
+          }
+
+          @media (max-device-width : 480px) {
+
+            .search-form .form-control,
+            .search-form button {
+              margin-right: 0;
+            }
+          }
+
+          .form-inline {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-flow: row wrap;
+            flex-flow: row wrap;
+            -ms-flex-align: center;
+            align-items: center;
+          }
+
+          @media (min-width:576px) {
+            .form-inline .form-control {
+              display: inline-block;
+              width: auto;
+              vertical-align: middle;
+            }
+          }
+
+          .form-control {
+            margin-left: 0.6%;
+            border-radius: 0px;
+          }
+        </style>
+        <!-- <div class="box-search clearfix">
           <input type="text" id="input-search-races" placeholder="Tên sự kiện" name="q" autocomplete="off">
           <button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
           <ul class="search-result"></ul>
-        </div>
+        </div> -->
+        <form class="search-form form-inline" enctype="multipart/form-data" action="/events" method="" id="form-search"
+          style="margin-bottom: 10px">
+          <div class="" style="overflow: hidden; width: 100%">
+            {% if bib != "" %}
+            <input type="text" class="form-control" name="bib" value="{{bib}}" placeholder="Nhập tên sự kiện"
+              style="float:left; width: 68%; margin-right: 0px;">
+            {% else %}
+            <input type="text" class="form-control" name="bib" value="" placeholder="Nhập tên sự kiện"
+              style="float:left; width: 68%; margin-right: 0px;display:none">
+            {% endif %}
+            <button class="active btn btn-default"
+              style="float:left;  width: 30%; margin-left: 5px; margin-right: 0px; border: 1px solid #CCC; font-weight: bold; color: #666; border-radius: 0;">Tìm
+              kiếm</button>
+          </div>
 
+        </form>
         <div class="box-item grid">
           <p class="box-title">Danh sách sự kiện</p>
           <div class="row wrapper-race-loop">
             {% for res in res %}
             <div class="col-md-4 col-sm-6 col-xs-12 race-item">
               <div class="race-loop">
-                <a href="https://irace.vn/races/ra-sun-god-gods-of-egypt" class="link">
+                <a href="/{{res['url']}}" class="link">
                   <div class="banner" style="background-image: url({{res['image']}})"></div>
                   <div class="race-text">
                     <p class="race-title">{{res['eventname']}}</p>
@@ -1986,18 +1379,9 @@
             {% endfor %}
           </div>
         </div>
-
-
-        <div id="modal-search-races" class="overlay modal-full-scrren">
-          <span class="closebtn" title="Đóng">×</span>
-          <div class="overlay-content">
-            <div class="box-search clearfix">
-              <input type="text" id="input-search-races" placeholder="Tên sự kiện" name="q" autocomplete="off">
-              <button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
-              <ul class="search-result"></ul>
-            </div>
-          </div>
-        </div>
-
-        </body>
-        {% endblock content %}
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+{% endblock content %}

@@ -1,25 +1,48 @@
-<h1>Create Event</h1>
-<form action="" method="post">
-  {{ form.hidden_tag() }}
-  <p>
-    {{ form.eventname.label }}<br>
-    {{ form.eventname(size=32) }}<br>
-    {% for error in form.eventname.errors %}
-    <span style="color: red;">[{{ error }}]</span>
-    {% endfor %}
-  </p>
-  <p>
-    {{ form.date.label }}<br>
-    {{ form.date(size=32) }}<br>
-  </p>
-  <p>
-    {{ form.place.label }}<br>
-    {{ form.place(size=32) }}<br>
-  </p>
-  <p>
-    {{ form.description.label }}<br>
-    {{ form.description(size=32) }}<br>
+{% extends "layout.html" %}
+{% block content %}
+<style>
+  .datepicker,
+  .table-condensed {
+    width: 288px;
+  }
 
-  </p>
-  <p>{{ form.submit() }}</p>
-</form>
+  body {
+    background-color: #fbfbfb;
+    color: #000000;
+    font-weight: 300;
+  }
+
+  .block-main {
+    margin: 8rem 0 20% 20%;
+  }
+</style>
+<main class="block-main">
+  <div class="container" id="search-result">
+    <h1>Thêm sự kiện</h1>
+    <form action="" method="post">
+      {{ form.hidden_tag() }}
+      <p>
+        {{ form.eventname.label }}<br>
+        {{ form.eventname(size=32) }}<br>
+        {% for error in form.eventname.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+      </p>
+      <p>
+        {{ form.date.label }}<br>
+        {{ form.date(class='datepicker') }}<br>
+      </p>
+      <p>
+        {{ form.place.label }}<br>
+        {{ form.place(size=32) }}<br>
+      </p>
+      <p>
+        {{ form.description.label }}<br>
+        {{ form.description(size=32) }}<br>
+
+      </p>
+      <p>{{ form.submit() }}</p>
+    </form>
+  </div>
+</main>
+{% endblock content %}

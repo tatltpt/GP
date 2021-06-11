@@ -1,39 +1,436 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="content">
-  <div class="container">
-    <div class="card">
-      <div class="card-body">
-        <div class="card-around">
-          <button
-              type="button"
-              class="btn btn-custom--large btn-custom--secodary__color"
-          >
-            <img src="static/imgs/header1.png" alt=""/>
-            <span>AIME-OCR認識</span>
-          </button>
-          <div class="round-view">
-            <div class="row">
-              <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-                <a class="round__btn--center" href="/report">
-                  <span>帳票</span>
-                </a>
-              </div>
-              <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-                <a class="round__btn--center disabled" href="#">
-                  <span>ナンバープレート</span>
-                </a>
-              </div>
-              <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-                <a class="round__btn--center disabled" href="#">
-                  <span>運転免許証</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
+
+<script type="text/javascript">
+  jQuery(function () {
+    function updateBibType(bib_type) {
+      if (bib_type == 'all') {
+        jQuery('[name=bib]').hide();
+        jQuery('[name=img]').hide();
+        jQuery('#bib_image').hide();
+        jQuery('#form-search button').hide();
+        jQuery('.nav-tab li').removeClass('active');
+        jQuery('[data-action=all]').addClass('active');
+      } else if (bib_type == 'image') {
+        jQuery('[name=bib]').hide();
+        jQuery('[name=img]').show();
+        jQuery('#form-search button').show();
+        jQuery('.nav-tab li').removeClass('active');
+        jQuery('[data-action=image]').addClass('active')
+        jQuery('#form-search').attr('method', 'POST');
+        jQuery('#bib_image').show();
+      } else if (bib_type == 'bib' || bib_type == '') {
+        jQuery('[name=bib]').show();
+        jQuery('[name=img]').hide();
+        jQuery('#form-search button').show();
+        jQuery('.nav-tab li').removeClass('active');
+        jQuery('[data-action=bib]').addClass('active')
+        jQuery('#form-search').attr('method', 'GET');
+        jQuery('#bib_image').hide();
+        jQuery('[name=bib]').focus();
+      }
+    }
+    jQuery('.bib_type_button').click(function () {
+      var action = jQuery(this).data('action');
+      jQuery('[name=bib_type]').val(action);
+      updateBibType(action);
+    });
+
+    jQuery('[name=bib_type]').change(function () {
+      updateBibType(jQuery(this).val());
+    });
+    jQuery('[data-fancybox="cl-group"]').fancybox({
+      baseClass: "fancybox-custom-layout",
+      infobar: false,
+      touch: {
+        vertical: false
+      },
+      infobar: true,
+      buttons: ['zoom', "download", "thumbs", "slideShow", 'fullScreen', "close"],
+      animationEffect: "zoom",
+      transitionEffect: "fade",
+      preventCaptionOverlap: false,
+      idleTime: false,
+      gutter: 50,
+    });
+  });
+</script>
+<style>
+  .block-main {
+    margin: 8rem 0 0 0;
+  }
+
+  @media (prefers-reduced-motion:reduce) {
+    .btn {
+      transition: none;
+    }
+  }
+
+  .btn:hover {
+    color: #031856;
+    text-decoration: none;
+  }
+
+  .btn:focus {
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(83, 147, 216, 0.25);
+  }
+
+  .btn:disabled {
+    opacity: .65;
+  }
+
+  .clearfix::after {
+    display: block;
+    clear: both;
+    content: "";
+  }
+
+  @media print {
+
+    *,
+    ::after,
+    ::before {
+      text-shadow: none !important;
+      box-shadow: none !important;
+    }
+
+    a:not(.btn) {
+      text-decoration: underline;
+    }
+
+    img {
+      page-break-inside: avoid;
+    }
+
+    p {
+      orphans: 3;
+      widows: 3;
+    }
+
+    body {
+      min-width: 992px !important;
+    }
+
+    .container {
+      min-width: 992px !important;
+    }
+  }
+
+  .search-form .form-control,
+  .search-form button,
+  .search-form .button {
+    font-size: 14px;
+    height: 36px !important;
+    line-height: 24px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-right: 10px;
+  }
+
+  .search-form .button {
+    margin: 0;
+  }
+
+  @media (max-device-width : 480px) {
+
+    .search-form .form-control,
+    .search-form button {
+      margin-right: 0;
+    }
+  }
+
+  .form-inline {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
+    -ms-flex-align: center;
+    align-items: center;
+  }
+
+  @media (min-width:576px) {
+    .form-inline .form-control {
+      display: inline-block;
+      width: auto;
+      vertical-align: middle;
+    }
+  }
+
+  .nav-tab {
+    margin-left: -40px;
+    margin-bottom: 0px;
+  }
+
+  .nav-tab li {
+    display: inline-block;
+    padding: 5px 10px;
+    text-align: center;
+    border: 1px solid #031856;
+    cursor: pointer;
+    height: 30px;
+    line-height: 20px;
+    font-size: 14px;
+  }
+
+  .nav-tab li:hover,
+  .nav-tab li.active,
+  .nav-tab li a:hover {
+    background-color: #031856;
+    color: #FFF;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  @media (max-device-width : 480px) {
+    #search-result .search-form {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  a.button,
+  button,
+  input[type="submit"] {
+    display: inline-block;
+    padding: 11px 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    margin-right: 7px;
+    border: 0;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    -webkit-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .03);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .03);
+    background-image: url(http://photo.tienphongmarathon.vn/assets/images/box_shadow_button.png);
+    background-repeat: repeat-x;
+  }
+
+  a.button_js {
+    padding: 0;
+  }
+
+  @media only screen and (min-width: 768px) {
+
+    a.button:after,
+    button:after,
+    input[type="submit"]:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      z-index: 1;
+      -webkit-transition: all .3s;
+      -moz-transition: all .3s;
+      transition: all .3s;
+      background: rgba(0, 0, 0, .05);
+    }
+
+    a:hover.button {
+      text-decoration: none;
+    }
+
+    a.button:hover:after,
+    button:hover:after,
+    input[type="submit"]:hover:after {
+      width: 100%;
+    }
+  }
+
+  button::-moz-focus-inner,
+  input::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+  }
+
+  #file-upload-button {
+    background: #efefef;
+    margin: 3px 3px 3px 3px !important;
+    padding: 1px 6px;
+  }
+
+  body {
+    background-color: #fbfbfb;
+    color: #000000;
+    font-weight: 300;
+  }
+
+  .pagination>.page-item>.page-link,
+  .pagination>.page-item>span {
+    border: 0;
+    border-radius: 30px !important;
+    transition: all .3s;
+    padding: 0 11px;
+    margin: 0 3px;
+    min-width: 30px;
+    height: 30px;
+    line-height: 30px;
+    color: #614242;
+    font-weight: 300;
+    font-size: 12px;
+    text-transform: uppercase;
+    background: transparent;
+    text-align: center;
+  }
+</style>
+
+<main class="block-main">
+  <div class="container" id="search-result">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+    <style type="text/css">
+      .img-thumbnail {
+        margin-bottom: 15px;
+        max-height: 266px;
+      }
+
+      .img-thumbnail-div {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .form-control {
+        border-radius: 0px;
+        border: 1px solid #ced4da !important;
+      }
+
+      .nav-tab {
+        margin-bottom: 0px;
+      }
+
+      h3 {
+        font-size: 20px;
+        line-height: 1em;
+        padding-bottom: 5px;
+      }
+
+      @media (max-device-width : 480px) {
+        #search-result .pagination {
+          float: none !important;
+        }
+
+        #search-result .search-form,
+        #search-result .col-md-6 {
+          margin-bottom: 0 !important;
+        }
+      }
+    </style>
+    <h3>{{eventname["eventname"]}}</h3>
+
+    <form class="search-form form-inline" enctype="multipart/form-data" action="/" method="" id="form-search"
+      style="margin-bottom: 10px">
+      <ul class="nav-tab" style="overflow: hidden">
+        {% if bib != "" %}
+        <li data-action="bib" class="button bib_type_button active">Tìm theo BIB</li>
+        <li data-action="image" class="button bib_type_button ">Tìm theo khuôn mặt</li>
+        <li data-action="all" href="/" class="button">Tất cả</li>
+        {% else %}
+        <li data-action="bib" class="button bib_type_button ">Tìm theo BIB</li>
+        <li data-action="image" class="button bib_type_button ">Tìm theo khuôn mặt</li>
+        <li data-action="all" href="/" class="button active">Tất cả</li>
+        {% endif %}
+      </ul>
+      <input type="hidden" name="race_id" value="tpm2021">
+      <input type="hidden" name="bib_type" value="all">
+      <div id="bib_image" style="width: 100%; overflow: hidden; line-height: 24px; margin: 5px 0px; display:none">Hãy
+        upload
+        một ảnh cá nhân rõ mặt của bạn để tìm ảnh gần giống bạn trong danh sách ảnh giải (Dành cho cả tình nguyện viên).
+      </div>
+      {% if bib != "" %}
+      <div class="" style="overflow: hidden; width: 100%">
+        <input type="text" class="form-control" name="bib" value="{{bib}}"
+          placeholder="Nhập số BIB / tên trên BIB, áo của bạn" style="float:left; width: 68%; margin-right: 0px;">
+        <input type="file" class="form-control" name="img" accept=".png, .jpg, .jpeg"
+          style="width: 300px; float: left;  width: 68%; margin-right: 0px;display:none">
+        <button class="active btn btn-default"
+          style="float:left;  width: 30%; margin-left: 5px; margin-right: 0px; border: 1px solid #CCC; font-weight: bold; color: #666; border-radius: 0;">Tìm
+          ảnh</button>
+      </div>
+      {% else %}
+      <div class="" style="overflow: hidden; width: 100%">
+        <input type="text" class="form-control" name="bib" value="" placeholder="Nhập số BIB / tên trên BIB, áo của bạn"
+          style="float:left; width: 68%; margin-right: 0px;display:none">
+        <input type="file" class="form-control" name="img" accept=".png, .jpg, .jpeg"
+          style="width: 300px; float: left;  width: 68%; margin-right: 0px;display:none">
+        <button class="active btn btn-default"
+          style="float:left;  width: 30%; margin-left: 5px; margin-right: 0px; border: 1px solid #CCC; font-weight: bold; color: #666; border-radius: 0; display:none">Tìm
+          ảnh</button>
+      </div>
+      {% endif %}
+    </form>
+
+    <div class="row">
+      <div class="col-md-8" style="margin-bottom: 1rem">
+        Có <strong>{{count}}</strong> ảnh của bạn, trong tổng số
+        <strong>{{total}}</strong> ảnh.
+      </div>
+      <div class="col-md-4">
+        <nav aria-label="Page navigation">
+          <ul class="pagination" style="float: right">
+            <li class="page-item"><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=0"
+                aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+            <li class="page-item "><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=0">1</a></li>
+            <li class="page-item "><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=1">2</a></li>
+            <li class="page-item"><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=2">3</a></li>
+            <li class="page-item "><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=3">4</a></li>
+            <li class="page-item "><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=4">5</a></li>
+            <li class="page-item"><a class="page-link" href="#">...</a></li>
+            <li class="page-item"><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=692"
+                aria-label="Next"><span aria-hidden="true">»</span></a></li>
+          </ul>
+        </nav>
       </div>
     </div>
+    <div class="row">
+      {% for image in images %}
+      <div class="col-sm-6 col-md-4 col-lg-3 img-thumbnail-div"><a data-fancybox="cl-group" href="{{ image.image_url }}"
+          target="img"><img src="{{ image.image_url }}" alt="..." class="img-fluid img-thumbnail"></a></div>
+      {% endfor %}
+    </div>
+    <!-- {% if prev_url %}
+    <a href="{{ prev_url }}">Newer posts</a>
+    {% endif %}
+    {% if next_url %}
+    <a href="{{ next_url }}">Older posts</a>
+    {% endif %} -->
+    <div class="row">
+      <div class="col-md-12">
+        <nav aria-label="Page navigation">
+          <ul class="pagination" style="float: right">
+            <li class="page-item"><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=0"
+                aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+            <li class="page-item "><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=0">1</a></li>
+            <li class="page-item "><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=1">2</a></li>
+            <li class="page-item"><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=2">3</a></li>
+            <li class="page-item "><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=3">4</a></li>
+            <li class="page-item "><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=4">5</a></li>
+            <li class="page-item"><a class="page-link" href="#">...</a></li>
+            <li class="page-item"><a class="page-link"
+                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=692"
+                aria-label="Next"><span aria-hidden="true">»</span></a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <br><br><br><br>
+    <hr>
   </div>
-</div>
+</main>
 {% endblock content %}

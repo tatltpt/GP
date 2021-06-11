@@ -673,7 +673,7 @@ body.loading .loader {
 @media screen and (max-width: 1440px) {
 
     body {
-        font-size: 80%;
+        font-size: 100%;
     }
 
     #upload .preview__content {
@@ -691,7 +691,7 @@ body.loading .loader {
 @media screen and (max-width: 1250px) {
 
     body {
-        font-size: 60%;
+        font-size: 100%;
     }
 
     #result .table thead tr th, td {
