@@ -26,7 +26,7 @@ import keras_ocr
 from slugify import slugify
 
 app.config['ALLOWED_EXTENSIONS'] = set(
-    ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'zip', 'csv', 'tiff'])
+    ['png', 'jpg', 'jpeg'])
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploaded')
 IMG_DIR = os.path.join(BASE_DIR, 'static', 'imgs')
@@ -244,14 +244,14 @@ def home():
                 bib = request.args.get('bib')
                 search = "%{}%".format(bib)
                 albums = Album.query.filter(Album.event_id == 4).all()
-                eventname = Event.query.filter_by(id = 4).first()
+                event = Event.query.filter_by(id = 4).first()
                 images = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).all()
                 count = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).count()
                 total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
-                return render_template('home.html', images=images, eventname=eventname, count=count, bib=bib, total=total)
+                return render_template('home.html', images=images, event=event, count=count, bib=bib, total=total)
     albums = Album.query.filter(Album.event_id == 4).all()
     images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).all()
-    eventname = Event.query.filter_by(id = 4).first()
+    event = Event.query.filter_by(id = 4).first()
     total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
     if request.method == "POST":
         if "img" in request.files:
@@ -260,25 +260,25 @@ def home():
             uploaded_file.save(uploaded_file_path)
             uploaded_file_path
  
-    return render_template('home.html', images=images, eventname=eventname, total=total)
+    return render_template('home.html', images=images, event=event,count=total,total=total)
 
-@app.route("/<string:slug>", methods=['GET', 'POST'])
+@app.route("/<string:slug>/", methods=['GET', 'POST'])
 @login_required
-def detail():
+def detail(slug):
     if request.method == "GET":
         if(request.args):
             if "bib" in request.args.keys():
                 bib = request.args.get('bib')
                 search = "%{}%".format(bib)
-                albums = Album.query.filter(Album.event_id == 4).all()
-                eventname = Event.query.filter_by(id = 4).first()
+                event = Event.query.filter_by(slug = slug).first()
+                albums = Album.query.filter(Album.event_id.in_([event.id])).all()
                 images = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).all()
                 count = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).count()
                 total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
-                return render_template('home.html', images=images, eventname=eventname, count=count, bib=bib, total=total)
-    albums = Album.query.filter(Album.event_id == 4).all()
+                return render_template('home.html', images=images, event=event, count=count, bib=bib, total=total,slug=slug)
+    event = Event.query.filter_by(slug = slug).first()
+    albums = Album.query.filter(Album.event_id.in_([event.id])).all()
     images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).all()
-    eventname = Event.query.filter_by(id = 4).first()
     total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
     if request.method == "POST":
         if "img" in request.files:
@@ -287,7 +287,7 @@ def detail():
             uploaded_file.save(uploaded_file_path)
             uploaded_file_path
  
-    return render_template('home.html', images=images, eventname=eventname, total=total)
+    return render_template('home.html', images=images, event=event,count=total,total=total,slug=slug)
 
 
 @app.route("/index1")
@@ -363,7 +363,7 @@ def events():
             'place': event.place,
             'description': event.description,
             'image': image.image_url,
-            'url' : slugify(event.eventname),
+            'slug' : event.slug,
         }
         res.append(r)
     return render_template('events.html', title='events', res=res)
@@ -399,7 +399,7 @@ def create_event():
     form = EventForm()
     if form.validate_on_submit():
         event = Event(eventname=form.eventname.data,
-                    date=form.date.data, place=form.place.data,description=form.description.data)
+                    date=form.date.data, place=form.place.data,description=form.description.data,slug=slugify(form.eventname.data))
         db.session.add(event)
         db.session.commit()
         flash('Tạo sự kiện thành công', 'success')

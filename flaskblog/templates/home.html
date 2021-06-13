@@ -319,9 +319,9 @@
         }
       }
     </style>
-    <h3>{{eventname["eventname"]}}</h3>
+    <h3>{{event["eventname"]}}</h3>
 
-    <form class="search-form form-inline" enctype="multipart/form-data" action="/" method="" id="form-search"
+    <form class="search-form form-inline" enctype="multipart/form-data" action="/{{slug}}" method="" id="form-search"
       style="margin-bottom: 10px">
       <ul class="nav-tab" style="overflow: hidden">
         {% if bib != "" %}
@@ -334,7 +334,6 @@
         <li data-action="all" href="/" class="button active">Tất cả</li>
         {% endif %}
       </ul>
-      <input type="hidden" name="race_id" value="tpm2021">
       <input type="hidden" name="bib_type" value="all">
       <div id="bib_image" style="width: 100%; overflow: hidden; line-height: 24px; margin: 5px 0px; display:none">Hãy
         upload
@@ -364,11 +363,17 @@
     </form>
 
     <div class="row">
+      {% if count == 0 %}
+      <div class="col-md-8" style="margin-bottom: 1rem">
+        Không tìm thấy ảnh nào của bạn. Bạn có thể tìm ảnh theo khuôn mặt.
+      </div>
+      {% else %}
       <div class="col-md-8" style="margin-bottom: 1rem">
         Có <strong>{{count}}</strong> ảnh của bạn, trong tổng số
         <strong>{{total}}</strong> ảnh.
       </div>
-      <div class="col-md-4">
+      {% endif %}
+      <!-- <div class="col-md-4">
         <nav aria-label="Page navigation">
           <ul class="pagination" style="float: right">
             <li class="page-item"><a class="page-link"
@@ -390,7 +395,7 @@
                 aria-label="Next"><span aria-hidden="true">»</span></a></li>
           </ul>
         </nav>
-      </div>
+      </div> -->
     </div>
     <div class="row">
       {% for image in images %}
@@ -404,7 +409,7 @@
     {% if next_url %}
     <a href="{{ next_url }}">Older posts</a>
     {% endif %} -->
-    <div class="row">
+    <!-- <div class="row">
       <div class="col-md-12">
         <nav aria-label="Page navigation">
           <ul class="pagination" style="float: right">
@@ -428,7 +433,7 @@
           </ul>
         </nav>
       </div>
-    </div>
+    </div> -->
     <br><br><br><br>
     <hr>
   </div>
