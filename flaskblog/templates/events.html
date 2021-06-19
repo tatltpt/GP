@@ -1345,11 +1345,11 @@
         <form class="search-form form-inline" enctype="multipart/form-data" action="/events" method="" id="form-search"
           style="margin-bottom: 10px">
           <div class="" style="overflow: hidden; width: 100%">
-            {% if bib != "" %}
-            <input type="text" class="form-control" name="bib" value="{{bib}}" placeholder="Nhập tên sự kiện"
+            {% if q != "" %}
+            <input type="text" class="form-control" name="q" value="{{q}}" placeholder="Nhập tên sự kiện"
               style="float:left; width: 68%; margin-right: 0px;">
             {% else %}
-            <input type="text" class="form-control" name="bib" value="" placeholder="Nhập tên sự kiện"
+            <input type="text" class="form-control" name="q" value="" placeholder="Nhập tên sự kiện"
               style="float:left; width: 68%; margin-right: 0px;display:none">
             {% endif %}
             <button class="active btn btn-default"

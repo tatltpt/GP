@@ -1,7 +1,7 @@
 import os
 import secrets
 from PIL import Image
-from flask import render_template, url_for, flash, redirect, request, jsonify, send_file
+from flask import render_template, url_for, flash, redirect, request, jsonify
 from flaskblog import app, db, bcrypt
 from flaskblog.forms import *
 from flaskblog.models import *
@@ -44,28 +44,9 @@ sln_options.add_argument('--disable-dev-shm-usage')
 
 pipeline = keras_ocr.pipeline.Pipeline()
 
-def create_uuid():
-    random.seed(datetime.datetime.now())
-    uuid = ''
-    for i in range(10):
-        uuid += str(random.randint(0, 9))
-    return uuid
-
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-
-
-def start_new_thread(function):
-    def decorator(*args, **kwargs):
-        t = Thread(target=function, args=args, kwargs=kwargs)
-        t.daemon = True
-        t.start()
-        return t
-
-    return decorator
-
 
 def download(url):
     try:
@@ -178,63 +159,6 @@ def predict():
         bib_predict()
     return render_template('admin/bib_predict.html')
 
-def update_sql(data):
-    formats = Format.query.filter().all()
-    for d in data:
-        if 'result' in d and d['result'] is not None:
-            res = Item.query.filter_by(id=d['id']).first()
-            for f in formats:
-                if int(d['type']) == f.id:
-                    output_image = f.output + d['result']['img'][0]
-                    res.output_path = download(output_image)
-                    res.result = json.dumps(d['result']['text'][0])
-                    res.status = DONE
-                    db.session.commit()
-        else:
-            res = Item.query.filter_by(id=d['id']).first()
-            res.status = ERROR
-            db.session.commit()
-
-
-def save_picture(form_picture):
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(
-        app.root_path, 'static/profile_pics', picture_fn)
-
-    output_size = (125, 125)
-    i = Image.open(form_picture)
-    i.thumbnail(output_size)
-    i.save(picture_path)
-
-    return picture_fn
-
-
-def zipdir(path, zip):
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            zip.write(os.path.join(root, file))
-
-
-@start_new_thread
-def start_extract(data):
-    formats = Format.query.filter().all()
-    for d in data:
-        try:
-            for f in formats:
-                if int(d['type']) == f.id:
-                    files = {'file': open(os.path.join(
-                        UPLOAD_DIR, d['name']), 'rb')}
-                    url = f.url + f.api
-                    r = requests.post(url, files=files)
-                    d['result'] = r.json()
-                    break
-        except Exception as e:
-            print(e)
-            d['result'] = None
-    update_sql(data)
-
 @app.route("/", methods=['GET', 'POST'])
 @login_required
 def home():
@@ -275,10 +199,14 @@ def detail(slug):
                 images = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).all()
                 count = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).count()
                 total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
-                return render_template('home.html', images=images, event=event, count=count, bib=bib, total=total,slug=slug)
+                return render_template('detail.html', images=images, event=event, count=count, bib=bib, total=total,slug=slug)
+    page = request.args.get('page', 1, type=int)
+    per_page = 40
     event = Event.query.filter_by(slug = slug).first()
     albums = Album.query.filter(Album.event_id.in_([event.id])).all()
-    images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).all()
+    images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).paginate(page,per_page,error_out=False)
+    next_url = url_for('detail', slug=slug, page=images.next_num) if images.has_next else None
+    prev_url = url_for('detail', slug=slug, page=images.prev_num) if images.has_prev else None
     total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
     if request.method == "POST":
         if "img" in request.files:
@@ -287,7 +215,7 @@ def detail(slug):
             uploaded_file.save(uploaded_file_path)
             uploaded_file_path
  
-    return render_template('home.html', images=images, event=event,count=total,total=total,slug=slug)
+    return render_template('detail.html', images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url, prev_url=prev_url)
 
 
 @app.route("/index1")
@@ -352,6 +280,26 @@ def ajaxfile():
 
 @app.route("/events")
 def events():
+    if request.method == "GET":
+        if(request.args):
+            if "q" in request.args.keys():
+                q = request.args.get('q')
+                search = "%{}%".format(q)
+                events = Event.query.filter(Event.eventname.like(search) | Event.place.like(search) | Event.description.like(search)).all()
+                res = []
+                for event in events:
+                    album = Album.query.filter(Album.event_id.in_([event.id])).first()
+                    image = Image.query.filter(Image.album_id.in_([album.id])).first()
+                    r = {
+                        'eventname': event.eventname,
+                        'date': event.date,
+                        'place': event.place,
+                        'description': event.description,
+                        'image': image.image_url,
+                        'slug' : event.slug,
+                    }
+                    res.append(r)
+                return render_template('events.html', title='events', res=res, q=q)
     events = Event.query.filter().all()
     res = []
     for event in events:
@@ -420,8 +368,6 @@ def crawl_image():
         get_link_image()
     return render_template('admin/crawl_image.html')
 
-
-
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -436,189 +382,6 @@ def login():
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
-
-
-@app.route("/update_template/<id>")
-@login_required
-def update_template(id):
-    template = SubFormat.query.filter_by(
-        company_id=current_user.company_id, id=id).first()
-    res = {
-        'id': template.id,
-        'name': template.name,
-        'description': template.description,
-        'img_path': template.img_path,
-        'company_id': template.company_id,
-        'created_at': template.created_at,
-    }
-    return render_template('update_template.html', data=res)
-
-
-@app.route("/delete_package", methods=['GET', 'POST'])
-@login_required
-def delete_package():
-    if request.method == 'POST':
-        if 'data' in request.form:
-            data = request.form['data'].split(',')
-            obj = Package.query.filter(Package.id.in_(data)).all()
-            for d in obj:
-                db.session.delete(d)
-            db.session.commit()
-            return jsonify({'mess': 'success'})
-    return jsonify({'mess': 'failed'}), 400
-
-
-@app.route("/delete_result", methods=['GET', 'POST'])
-@login_required
-def delete_result():
-    if request.method == 'POST':
-        if 'data' in request.form:
-            data = request.form['data'].split(',')
-            obj = Item.query.filter(Item.id.in_(data)).all()
-            for d in obj:
-                db.session.delete(d)
-            db.session.commit()
-            return jsonify({'mess': 'success'})
-    return jsonify({'mess': 'failed'}), 400
-
-
-@app.route("/delete_template", methods=['POST'])
-@login_required
-def delete_template():
-    if request.method == 'POST':
-        if 'id' in request.form:
-            id = request.form['id']
-            id = id.split(',')
-            for index in id:
-                obj = SubFormat.query.filter_by(id=index).first()
-                db.session.delete(obj)
-            db.session.commit()
-        return jsonify({'mess': 'success'})
-    return redirect(url_for('templates'))
-
-
-@app.route("/duplicate_template", methods=['POST'])
-@login_required
-def duplicate_template():
-    if request.method == 'POST':
-        if 'id' in request.form:
-            id = request.form['id']
-            id = id.split(',')
-            # for index in id:
-            obj = SubFormat.query.filter_by(id=id).first()
-            name = obj.name + ' (COPY)'
-            obj = SubFormat(name=name, description=obj.description, img_path=obj.img_path, format_id=obj.format_id,
-                            company_id=obj.company_id, created_ip=obj.created_ip, created_user=obj.created_user)
-            db.session.add(obj)
-            db.session.commit()
-            return jsonify({'id': obj.id})
-        return jsonify({'mess': 'success'})
-    return redirect(url_for('templates'))
-
-
-@app.route("/rename_template", methods=['POST'])
-@login_required
-def rename_template():
-    if request.method == 'POST':
-        if 'id' in request.form:
-            id = request.form['id']
-            if 'name' in request.form:
-                name = request.form['name']
-                obj = SubFormat.query.filter_by(id=id).first()
-                obj.name = name
-                db.session.commit()
-        return jsonify({'mess': 'success'})
-    return redirect(url_for('templates'))
-
-
-
-
-
-@app.route("/save_export", methods=['POST'])
-@login_required
-def save_export():
-    import xlwt
-    if request.method == 'POST':
-        if 'id' in request.form:
-            # print(data)
-            obj = Item.query.filter_by(id=request.form['id']).first()
-            book = xlwt.Workbook(encoding="utf-8")
-            path = datetime.datetime.now().strftime("%Y%m%d_%H%M%S%f") + '.xls'
-            if obj.result is not None:
-                name = obj.name
-                if len(obj.name) > 30:
-                    name = name[:30]
-                sheet = book.add_sheet(name)
-                sheet.write(0, 0, "ID")
-                sheet.write(0, 1, "Text")
-                c = 1
-                res = json.loads(obj.result)
-                for i, x in enumerate(res['raw']['result']):
-                    sheet.write(c, 0, i)
-                    sheet.write(c, 1, x['text'])
-                    c += 1
-            book.save(os.path.join(UPLOAD_DIR, path))
-            return jsonify({'path': '/static/uploaded/' + path})
-
-
-@app.route("/save", methods=['POST'])
-@login_required
-def save_data():
-    # import xlwt
-    if request.method == 'POST':
-        if 'data' in request.form:
-            data = request.form['data']
-            obj = Item.query.filter_by(id=request.form['id']).first()
-            # book = xlwt.Workbook(encoding="utf-8")
-            # path = datetime.datetime.now().strftime("%Y%m%d_%H%M%S%f") + '.xls'
-            obj.result = data
-            db.session.commit()
-
-            return jsonify({'success': True})
-
-
-@app.route("/exportv2", methods=['POST'])
-@login_required
-def exportv2():
-    if request.method == 'POST':
-        if 'data' in request.form:
-            obj = Item.query.filter_by(id=request.form['id']).first()
-            templates = SubFormat.query.filter(
-                company_id=current_user.company_id).all()
-            temp = [t.name for t in templates]
-            if obj.type in temp:
-                path = datetime.datetime.now().strftime("%Y%m%d_%H%M%S%f") + '.csv'
-                tmp = None
-                for t in templates:
-                    if obj.type == t.name:
-                        tmp = json.loads(t.description)
-                        break
-                f = open(os.path.join(UPLOAD_DIR, path), 'w', encoding="utf-8")
-                extracted = json.loads(obj.result)['extracted']
-
-                keys = sorted(tmp['results'], key=itemgetter('position'))
-                rows = [[d['key'] for d in keys]]
-                m = 0
-                for x in extracted:
-                    merge = []
-                    for i in extracted[x]:
-                        merge = merge + i
-                    extracted[x] = merge
-                    if len(extracted[x]) > m:
-                        m = len(extracted[x])
-                for i in range(m):
-                    r = []
-                    for x in keys:
-                        try:
-                            r.append(extracted[x['key']][i])
-                        except:
-                            r.append('')
-                    rows.append(r)
-                for row in rows:
-                    f.write(','.join(row))
-                    f.write('\n')
-                return jsonify({'path': '/static/uploaded/' + path})
-
 
 @app.route("/update_pass", methods=['POST'])
 @login_required
@@ -664,105 +427,6 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-
-@app.route("/account", methods=['GET', 'POST'])
-@login_required
-def account():
-    form = UpdateAccountForm()
-    if form.validate_on_submit():
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data)
-            current_user.image_file = picture_file
-        current_user.username = form.username.data
-        current_user.email = form.email.data
-        db.session.commit()
-        flash('Your account has been updated!', 'success')
-        return redirect(url_for('account'))
-    elif request.method == 'GET':
-        form.username.data = current_user.username
-        form.email.data = current_user.email
-    image_file = url_for(
-        'static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account', image_file=image_file, form=form)
-
-
-@app.route("/update_view_status", methods=['POST'])
-@login_required
-def update_view_status():
-    if request.method == 'POST':
-        if 'id' in request.form:
-            index = request.form['id']
-            obj = Item.query.filter_by(id=index).first()
-            obj.view_status = True
-            db.session.commit()
-        return jsonify({'mess': 'success'})
-
-
-@app.route("/package/<id>", methods=['GET', 'POST'])
-@login_required
-def package(id):
-    items = Item.query.filter_by(pkg_id=id).all()
-    res = []
-    for data in items:
-        r = {
-            'id': data.id,
-            'name': data.name,
-            'img1': data.image1,
-            'img2': data.image2,
-            'created_at': data.created_at,
-        }
-        res.append(r)
-
-    return render_template('package.html', title='Package', data={'data': res})
-
-
-@app.route("/package/<id>/result", methods=['GET', 'POST'])
-@login_required
-def result(id):
-    items = Item.query.filter_by(pkg_id=id).all()
-    res = []
-    for data in items:
-        r = {
-            'id': data.id,
-            'name': data.name,
-            'img1': data.image1,
-            'img2': data.image2,
-            'output1': data.output1,
-            'output2': data.output2,
-            'result': json.loads(data.result) if data.result is not None else None,
-            'status': data.status,
-            'created_at': data.created_at,
-        }
-        res.append(r)
-    return render_template('result.html', title='Result', data={'data': res})
-
-
-@app.route("/create_package", methods=['POST'])
-@login_required
-def create_template():
-    if request.method == 'POST':
-        if 'name' in request.form:
-            name = request.form['name']
-            obj = Package(name=name, created_ip=request.remote_addr,
-                          user_id=current_user.id)
-            db.session.add(obj)
-            db.session.commit()
-            return jsonify({'id': obj.id})
-
-
-@app.route("/delete_item", methods=['GET', 'POST'])
-@login_required
-def delete_item():
-    if request.method == 'POST':
-        if 'id' in request.form:
-            id = request.form['id']
-            obj = Item.query.filter_by(id=id).first()
-            db.session.delete(obj)
-            db.session.commit()
-            return jsonify({'mess': 'success'})
-    return jsonify({'mess': 'failed'}), 400
-
-
 def save_image(file):
     path = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '_' + \
         str(random.randint(1000, 9999)) + '.png'
@@ -775,34 +439,3 @@ def save_image(file):
         img = cv2.imdecode(img, cv2.COLOR_RGB2BGR)
     cv2.imwrite(os.path.join(UPLOAD_DIR, path), img)
     return path
-
-
-@app.route("/create_item", methods=['GET', 'POST'])
-@login_required
-def create_item():
-    if request.method == 'POST':
-        if 'file1' in request.files and 'file2' in request.files:
-            file1 = request.files['file1']
-            file2 = request.files['file2']
-
-            if 'name' in request.form:
-                name = request.form['name']
-                if 'pkg_id' in request.form:
-                    pkg_id = request.form['pkg_id']
-
-                    image1 = save_image(file1)
-                    image2 = save_image(file2)
-                    item = Item(name=name, image1=image1, image2=image2, status=WAITING, pkg_id=pkg_id,
-                                created_ip=request.remote_addr)
-                    db.session.add(item)
-                    db.session.commit()
-                    res = {
-                        'id': item.id,
-                        'name': item.name,
-                        'img1': item.image1,
-                        'img2': item.image2,
-                        'created_at': item.created_at,
-                    }
-                    return jsonify({'mess': 'success', 'data': res})
-
-    return jsonify({'mess': 'limited'}), 400
