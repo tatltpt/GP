@@ -15,8 +15,31 @@
   .block-main {
     margin: 8rem 0 20% 20%;
   }
+  .form-check, label {
+    color: rgb(21, 21, 24) !important;
+  }
+
+  input {
+    height: 30px;
+    width: 100%;
+  }
+  #date{
+    width: 100% !important;
+  }
+
+  #description {
+    height: 100px !important;
+  }
+
+  #submit {
+    height: 40px !important; 
+    width: 70px !important; 
+    background-color: palegreen;
+    border: 2px solid palegreen;;
+    border-radius: 5px;
+  }
 </style>
-<main class="block-main">
+<!-- <main class="block-main">
   <div class="container" id="search-result">
     <h1>Thêm sự kiện</h1>
     <form action="" method="post">
@@ -42,6 +65,53 @@
 
       </p>
       <p>{{ form.submit() }}</p>
+    </form>
+  </div>
+</main> -->
+<main class="block-main">
+  <div class="container" id="search-result" style="margin-right: 50px;">
+    <div style="text-align: center;"><h1>Thêm sự kiện</h1></div>
+    <form action="" method="POST">
+      {{ form.hidden_tag() }}
+      <div style="height: 250px;width: 100%; background-color: rgb(216, 219, 224);">
+        <div style="padding-top: 100px; text-align: center;">
+          <img style="height: 50px; width: 50px;" src="https://cdn1.iconfinder.com/data/icons/rounded-black-basic-ui/139/Photo_Add-RoundedBlack-512.png" alt="...">
+          <p>Thêm ảnh cover cho sự kiện</p>
+        </div>
+        <div style="display: flex; margin-top: 20px; padding-left: 10px;" class="row">
+          <div class="col-lg-2 col-sm-6 col-md-4" style="color: rgb(28, 37, 37); font-size: 12px;">{{ form.eventname.label }}</div>
+          <div class="col-lg-8 col-sm-6 col-md-8">
+            {{ form.eventname(size=32) }}<br>
+            {% for error in form.eventname.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; margin-top: 20px; padding-left: 10px;" class="row">
+        <div class="col-lg-6">
+          <div>{{ form.date.label }}</div>
+          <div style="margin-top: 10px;">{{ form.date(class='datepicker') }}</div>
+        </div>
+        <div class="col-lg-6">
+          <div>{{ form.place.label }}</div>
+          <div style="margin-top: 10px;">{{ form.place(size=32) }}</div>
+        </div>
+      </div>
+
+      <div style="display: block; margin-top: 20px; padding-left: 20px; margin-right: 5px;" class="row">
+        <div>
+          {{ form.description.label }}:
+        </div>
+        <div style="margin-top: 15px;">
+          {{ form.description(size=32) }}
+        </div>
+      </div>
+      <!-- <div style="display: block; margin-top: 20px; padding-left: 20px; margin-right: 5px;" class="row">
+        <div><label>Đường dẫn ảnh của sự kiện</label></div>
+        <input type="text">
+      </div> -->
+      <div style="margin-top: 30px; text-align: center; ">{{ form.submit() }}</div>
     </form>
   </div>
 </main>

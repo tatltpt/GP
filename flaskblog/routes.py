@@ -24,6 +24,13 @@ from selenium import webdriver
 import re
 import keras_ocr
 from slugify import slugify
+from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.vgg16 import preprocess_input
+from keras.layers import Flatten, MaxPooling2D
+import h5py
+from collections import OrderedDict
+import math
 
 app.config['ALLOWED_EXTENSIONS'] = set(
     ['png', 'jpg', 'jpeg'])
@@ -43,6 +50,204 @@ sln_options.add_argument('--no-sandbox')
 sln_options.add_argument('--disable-dev-shm-usage')
 
 pipeline = keras_ocr.pipeline.Pipeline()
+
+confidence_default = 0.5
+threshold = 0.3
+
+# load class labels
+labels = open("YOLO/yolo.names").read().strip().split("\n")
+
+# load YOLO weights and configuration file
+cfg = "YOLO/yolov4-custom.cfg"
+weight = "YOLO/yolov4-custom_last.weights"
+# load YOLO detector trained on custom dataset
+net = cv2.dnn.readNetFromDarknet(cfg, weight)
+
+# determine the output layer names
+l_names = net.getLayerNames()
+ol_names = [l_names[i[0]-1] for i in net.getUnconnectedOutLayers()]
+
+def detect_img(img):
+    image_r = img
+    (H,W) = image_r.shape[:2]
+
+    # construct a blob from the input image, pass to the YOLO detector and
+    # grab the bounding boxes and associated probabilities
+    blob = cv2.dnn.blobFromImage(image_r, 1/255.0, (416,416), swapRB=True, crop=False)
+    net.setInput(blob)
+    layer_outputs = net.forward(ol_names)
+
+    # initialize some output lists
+    boxes = []
+    confidences = []
+    classIDs = []
+
+    # output of YOLO [0:4]: [center_x, center_y, box_w, box_h]
+    # output of YOLO [4]: confidence
+    # output of YOLO [5:]: class scores
+    for output in layer_outputs:
+        for detection in output:
+            scores = detection[5:]
+            classID = np.argmax(scores)
+            confidence = scores[classID]
+
+            if confidence > confidence_default:
+                (center_x, center_y, width, height) = (detection[0:4] * ([W, H, W, H])).astype("int")
+                x = int(center_x - (width/2))
+                y = int(center_y - (height/2))
+                if x < 0:
+                    width = width - x
+                    x = 0
+                if y < 0:
+                    height = height - y 
+                    y = 0
+                boxes.append([x, y, int(width), int(height)])
+                confidences.append(float(confidence))
+                classIDs.append(classID)
+    idxs = cv2.dnn.NMSBoxes(boxes, confidences, confidence_default, threshold)
+    return boxes, confidences, classIDs, idxs
+
+def cut_boxes(img, x, y, w, h):
+    cuted = img[y:y+h, x:x+w]
+    return cuted
+
+def check_arr(str, str1):
+    a = []
+    for i in range(len(str)):
+        for j in range(len(str1)):
+            if str1[j] == str[i]:
+                a.append(str1[j])
+    return a
+
+
+def get_feature(img):
+    model = VGG16(weights='imagenet', include_top=False)
+
+    img_resized = cv2.resize(src=img, dsize=(224, 224))
+    #img_f = image.load_img(img, target_size=(224, 224))
+    x = image.img_to_array(img_resized)
+    x = np.expand_dims(x, axis=0)
+    x = preprocess_input(x)
+
+    features = model.predict(x)
+
+    max_pool_2d = MaxPooling2D(pool_size=(2,2), strides=(2,2))
+    features = max_pool_2d(features)
+    features = Flatten()(features)
+    return features
+
+def load_features(file_name):
+    f = h5py.File(file_name, 'r')
+    features = f['features'][:]
+    image_paths = f['image_paths']
+    
+    return features, image_paths
+
+def index_annoy(features, file_name):
+    from annoy import AnnoyIndex
+    f = len(features[0][0])
+    t = AnnoyIndex(f, 'angular')  # Length of item vector that will be indexed
+    for i in range(len(features)):
+        v = features[i][0]
+        t.add_item(i, v)
+
+    t.build(10)  # 10 trees
+    t.save(file_name)
+
+def search_feature(input_file):
+    from annoy import AnnoyIndex
+    features, image_paths = load_features(file_name='face.h5')
+    features2, image_paths2 = load_features(file_name='body.h5')
+    print(len(features))
+
+    input_f = h5py.File(input_file, 'r')
+    features_arr = input_f['features'][:]
+    class_arr = input_f['labels']
+
+    label = str(class_arr[0])[2:len(str(class_arr[0]))-1]
+    print(label)
+    
+    f = len(features_arr[0][0])
+    face = AnnoyIndex(f, 'angular')
+    body = AnnoyIndex(f, 'angular')
+    face.load('face.ann') # super fast, will just mmap the file
+    body.load('body.ann')
+
+    images_all = []
+    images_face = []
+    images_body = []
+    print('lay 10 chi muc', face.get_nns_by_item(0, 10))
+    print('features_arr',len(features_arr))
+    for i in range(len(features_arr)):
+        imgs = []
+        label = str(class_arr[i])[2:len(str(class_arr[i]))-1]
+        if label == 'face':
+            print("lay 10 chi muc",face.get_nns_by_vector(features_arr[i][0], 10)) # will find the 1000 nearest neighbors
+            index_img, inclu = face.get_nns_by_vector(features_arr[i][0], 10, include_distances=True) 
+            print("khoang cách", inclu)
+            for i in range(len(inclu)):
+                if inclu[i] < 0.8:
+                    print(index_img[i])
+                    path = str(image_paths[index_img[i]])[2:len(str(image_paths[index_img[i]]))-1]
+                    imgs.append(path)
+            imgs = list( OrderedDict.fromkeys(imgs) )
+            images_face = images_face + imgs
+            images_face = list( OrderedDict.fromkeys(images_face) )
+            print("so anh face", images_face)
+
+        if label == 'body':
+            print("lay 10 chi muc",body.get_nns_by_vector(features_arr[i][0], 10)) # will find the 1000 nearest neighbors
+            index_img, inclu = body.get_nns_by_vector(features_arr[i][0], 10, include_distances=True) 
+            print("khoang cách", inclu)
+            for i in range(len(inclu)):
+                if inclu[i] < 0.8:
+                    print(index_img[i])
+                    path = str(image_paths[index_img[i]])[2:len(str(image_paths[index_img[i]]))-1]
+                    imgs.append(path)
+            imgs = list( OrderedDict.fromkeys(imgs) )
+            images_body = images_body + imgs
+            images_body = list( OrderedDict.fromkeys(images_body) )
+            print("so anh body", images_body)
+
+    images_all = images_face + images_body
+    images_all = list( OrderedDict.fromkeys(images_all) )
+    images = check_arr(images_body, images_face)
+    print("dong 356", images_all)
+    print("images", images)
+    return images, images_all
+
+def search_image(path):
+    input_i = cv2.imread(path)
+    boxes, confidences, classIDs, idxs = detect_img(input_i)
+    indexs = []
+    indexs_all = []
+    if len(idxs) > 0:          
+        features_arr = []
+        class_arr = [] 
+        for i in idxs.flatten():
+            if (labels[classIDs[i]] == 'face' or labels[classIDs[i]] == 'body'):
+                (x,y) = (boxes[i][0], boxes[i][1])
+                (w,h) = (boxes[i][2], boxes[i][3])
+                box = cut_boxes(input_i, x, y, w, h)
+                fe = get_feature(box)
+                features_arr.append(fe)
+                class_arr.append(labels[classIDs[i]])
+                print(labels[classIDs[i]])
+            else: 
+                continue
+    with h5py.File('feature.h5',  "a") as f:
+            if list(f.keys()) != []:
+                if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'labels':
+                    del f['features']
+                    del f['labels']
+            f.create_dataset('features', data=features_arr)
+            f.create_dataset('labels', data=class_arr)
+
+    f = h5py.File('feature.h5', 'r')
+    features_arr = f['features'][:]
+    indexs, indexs_all = search_feature(input_file='feature.h5')
+
+    return indexs, indexs_all, len(features_arr)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -159,6 +364,66 @@ def predict():
         bib_predict()
     return render_template('admin/bib_predict.html')
 
+@app.route("/get_feature", methods=['GET', 'POST'])
+# @login_required
+def save_feature():
+    if request.method == 'POST':
+        albums = Album.query.filter(Album.event_id == 4).all()
+        features_face = []
+        face_paths = []
+        features_body = []
+        body_paths = []
+        for album in albums:
+            images = Image.query.filter(Image.album_id == album.id).all()            
+            for image in images:
+                print(image.image_url)        
+                resp = urllib.request.urlopen(image.image_url)
+                img = np.asarray(bytearray(resp.read()), dtype="uint8")
+                img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+                boxes, confidences, classIDs, idxs = detect_img(img)
+                if len(idxs) > 0:                
+                    for i in idxs.flatten():
+                        if (labels[classIDs[i]] == 'face'):
+                            (x,y) = (boxes[i][0], boxes[i][1])
+                            (w,h) = (boxes[i][2], boxes[i][3])
+                            box = cut_boxes(img, x, y, w, h)
+                            fe = get_feature(box)
+                            features_face.append(fe)
+                            face_paths.append(image.image_url)
+                        if (labels[classIDs[i]] == 'body'):
+                            (x,y) = (boxes[i][0], boxes[i][1])
+                            (w,h) = (boxes[i][2], boxes[i][3])
+                            box = cut_boxes(img, x, y, w, h)
+                            fe = get_feature(box)
+                            features_body.append(fe)
+                            body_paths.append(image.image_url)
+                        else:
+                            continue
+        with h5py.File('face.h5',  "a") as f:
+            if list(f.keys()) != []:
+                if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'image_paths':
+                    del f['features']
+                    del f['image_paths']
+            f.create_dataset('features', data=features_face)
+            f.create_dataset('image_paths', data=face_paths)
+            f.close()
+
+        with h5py.File('body.h5',  "a") as f:
+            if list(f.keys()) != []:
+                if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'image_paths':
+                    del f['features']
+                    del f['image_paths']
+            f.create_dataset('features', data=features_body)
+            f.create_dataset('image_paths', data=body_paths)
+            f.close()
+        features, image_paths = load_features(file_name='face.h5')
+        features2, image_paths2 = load_features(file_name='body.h5')
+        print(features[9])
+        print('path',image_paths[9])
+        index_annoy(features, file_name='face.ann')
+        index_annoy(features2, file_name='body.ann')
+    return render_template('admin/get_feature.html')
+
 @app.route("/", methods=['GET', 'POST'])
 @login_required
 def home():
@@ -187,7 +452,7 @@ def home():
     return render_template('home.html', images=images, event=event,count=total,total=total)
 
 @app.route("/<string:slug>/", methods=['GET', 'POST'])
-@login_required
+#@login_required
 def detail(slug):
     if request.method == "GET":
         if(request.args):
@@ -202,20 +467,32 @@ def detail(slug):
                 return render_template('detail.html', images=images, event=event, count=count, bib=bib, total=total,slug=slug)
     page = request.args.get('page', 1, type=int)
     per_page = 40
-    event = Event.query.filter_by(slug = slug).first()
+    event = Event.query.filter_by(slug=slug).first()
     albums = Album.query.filter(Album.event_id.in_([event.id])).all()
     images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).paginate(page,per_page,error_out=False)
     next_url = url_for('detail', slug=slug, page=images.next_num) if images.has_next else None
     prev_url = url_for('detail', slug=slug, page=images.prev_num) if images.has_prev else None
     total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
+
+    indexs = []
+    indexs_all = []
     if request.method == "POST":
-        if "img" in request.files:
-            uploaded_file = request.files["img"]
-            uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
-            uploaded_file.save(uploaded_file_path)
-            uploaded_file_path
+        st = time.time()
+        uploaded_file = request.files["img"]
+        uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
+        print(uploaded_file_path)
+        uploaded_file.save(uploaded_file_path)
+        uploaded_file_path
+        print(uploaded_file_path)
+        indexs, indexs_all, f = search_image(uploaded_file_path)
+        end = time.time()
+        len1 = len(indexs)
+        len2 = len(indexs_all)
+        t = end - st
+        
+        return render_template('detail.html', indexs=indexs, indexs_all=indexs_all, len1=len1, len2=len2, t=t, f=f, images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url, prev_url=prev_url)
  
-    return render_template('detail.html', images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url, prev_url=prev_url)
+    return render_template('detail.html', images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url, prev_url=prev_url,indexs_all=indexs_all)
 
 
 @app.route("/index1")
@@ -345,9 +622,16 @@ def register():
 # @login_required
 def create_event():
     form = EventForm()
+    if request.method == 'POST':
+        event = Event(eventname=form.eventname.data, date=form.date.data, place=form.place.data,description=form.description.data,slug=slugify(form.eventname.data))
+        print('form.eventname', event)
+        print('date', form.date.data)
     if form.validate_on_submit():
+        print('form.eventname11', event)
+        print('date11', form.date.data)
         event = Event(eventname=form.eventname.data,
                     date=form.date.data, place=form.place.data,description=form.description.data,slug=slugify(form.eventname.data))
+        print('form.eventname', event)
         db.session.add(event)
         db.session.commit()
         flash('Tạo sự kiện thành công', 'success')
