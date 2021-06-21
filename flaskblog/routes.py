@@ -467,7 +467,6 @@ def home():
     return render_template('home.html', images=images, event=event,count=total,total=total)
 
 @app.route("/events/<string:slug>/", methods=['GET', 'POST'])
-#@login_required
 def detail(slug):
     if request.method == "GET":
         if(request.args):
@@ -635,27 +634,22 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 @app.route("/create_event", methods=['GET', 'POST'])
-# @login_required
+@login_required
 def create_event():
+    print("===========")
     form = EventForm()
-    if request.method == 'POST':
-        event = Event(eventname=form.eventname.data, date=form.date.data, place=form.place.data,description=form.description.data,slug=slugify(form.eventname.data))
-        print('form.eventname', event)
-        print('date', form.date.data)
     if form.validate_on_submit():
-        print('form.eventname11', event)
-        print('date11', form.date.data)
-        event = Event(eventname=form.eventname.data,
-                    date=form.date.data, place=form.place.data,description=form.description.data,slug=slugify(form.eventname.data))
-        print('form.eventname', event)
+        event = Event(eventname=form.eventname.data,date=form.date.data, place=form.place.data,description=form.description.data,slug=slugify(form.eventname.data))
         db.session.add(event)
+        print("adddd")
         db.session.commit()
+        print("committtt")
         flash('Tạo sự kiện thành công', 'success')
         return redirect(url_for('create_event'))
     return render_template('create_event.html', title='create_event', form=form)
 
 @app.route("/create_album", methods=['GET', 'POST'])
-# @login_required
+@login_required
 def create_album():
     if request.method == 'POST':
         get_link_album()
