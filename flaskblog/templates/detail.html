@@ -267,7 +267,7 @@
     min-width: 30px;
     height: 30px;
     line-height: 30px;
-    color: #614242;
+    color: #000000;
     font-weight: 300;
     font-size: 12px;
     text-transform: uppercase;
@@ -321,17 +321,17 @@
     </style>
     <h3>{{event["eventname"]}}</h3>
 
-    <form class="search-form form-inline" enctype="multipart/form-data" action="/{{slug}}/" method="POST" id="form-search"
-      style="margin-bottom: 10px">
+    <form class="search-form form-inline" enctype="multipart/form-data" action="/events/{{slug}}/" method="POST"
+      id="form-search" style="margin-bottom: 10px">
       <ul class="nav-tab" style="overflow: hidden">
-        {% if bib != "" %}
+        {% if bib != None %}
         <li data-action="bib" class="button bib_type_button active">Tìm theo BIB</li>
         <li data-action="image" class="button bib_type_button ">Tìm theo ảnh có sẵn</li>
-        <li data-action="all" href="/{{slug}}" class="button">Tất cả</li>
+        <li data-action="all" class="button"><a href='/events/{{slug}}'>Tất cả</a></li>
         {% else %}
         <li data-action="bib" class="button bib_type_button ">Tìm theo BIB</li>
         <li data-action="image" class="button bib_type_button ">Tìm theo ảnh có sẵn</li>
-        <li data-action="all" href="/{{slug}}" class="button active">Tất cả</li>
+        <li data-action="all" class="button active"><a href='/events/{{slug}}'>Tất cả</a></li>
         {% endif %}
       </ul>
       <input type="hidden" name="bib_type" value="all">
@@ -339,10 +339,10 @@
         upload
         một ảnh cá nhân rõ mặt của bạn để tìm ảnh gần giống bạn trong danh sách ảnh giải (Dành cho cả tình nguyện viên).
       </div>
-      {% if bib != "" %}
+      {% if bib != None %}
       <div class="" style="overflow: hidden; width: 100%">
-        <input type="text" class="form-control" name="bib" value="{{bib}}"
-          placeholder="Nhập số BIB / tên trên BIB, áo của bạn" style="float:left; width: 68%; margin-right: 0px;">
+        <input type="text" class="form-control" name="bib" value="{{bib}}" placeholder="Nhập số BIB trên áo của bạn"
+          style="float:left; width: 68%; margin-right: 0px;">
         <input type="file" class="form-control" name="img" accept=".png, .jpg, .jpeg"
           style="width: 300px; float: left;  width: 68%; margin-right: 0px;display:none">
         <button class="active btn btn-default"
@@ -351,49 +351,45 @@
       </div>
       {% else %}
       <div class="" style="overflow: hidden; width: 100%">
-        <input type="text" class="form-control" name="bib" value="" placeholder="Nhập số BIB / tên trên BIB, áo của bạn"
+        <input type="text" class="form-control" name="bib" value="" placeholder="Nhập số BIB áo của bạn"
           style="float:left; width: 68%; margin-right: 0px;display:none">
         <input type="file" class="form-control" name="img" accept=".png, .jpg, .jpeg"
           style="width: 300px; float: left;  width: 68%; margin-right: 0px;display:none">
-        <button class="active btn btn-default" type = "submit" value="Submit"
+        <button class="active btn btn-default"
           style="float:left;  width: 30%; margin-left: 5px; margin-right: 0px; border: 1px solid #CCC; font-weight: bold; color: #666; border-radius: 0; display:none">Tìm
           ảnh</button>
       </div>
       {% endif %}
     </form>
-    {% if indexs_all != [] %}
-      <div style="height: 60px; font-weight: bold; color: #666; font-size: 20px;">Kết quả tìm kiếm ({{ len1 }})</div>
-      <div class="row">      
-        {% for image in indexs %}
-        <div class="col-sm-6 col-md-4 col-lg-3 img-thumbnail-div"><a data-fancybox="cl-group" href="{{ image }}"
-            target="img"><img src="{{ image }}" alt="..." class="img-fluid img-thumbnail"></a></div>
-        {% endfor %}
-      </div>
-      <div style="height: 60px; font-weight: bold; color: #666; font-size: 20px;">Kết quả tìm kiếm mở rộng ({{ len2 }})</div>
-      <div class="row">        
-          {% for image in indexs_all %}
-          <div class="col-sm-6 col-md-4 col-lg-3 img-thumbnail-div"><a data-fancybox="cl-group" href="{{ image }}"
-              target="img"><img src="{{ image }}" alt="..." class="img-fluid img-thumbnail"></a></div>
-          {% endfor %}
-      </div>
+    {% if indexs_all != [] and len1 %}
+    <div style="height: 60px; font-weight: bold; color: #666; font-size: 20px;">Kết quả tìm kiếm ({{ len1 }})</div>
+    <div class="row">
+      {% for image in indexs %}
+      <div class="col-sm-6 col-md-4 col-lg-3 img-thumbnail-div"><a data-fancybox="cl-group" href="{{ image }}"
+          target="img"><img src="{{ image }}" alt="..." class="img-fluid img-thumbnail"></a></div>
+      {% endfor %}
+    </div>
+    <div style="height: 60px; font-weight: bold; color: #666; font-size: 20px;">Kết quả tìm kiếm mở rộng ({{ len2 }})
+    </div>
+    <div class="row">
+      {% for image in indexs_all %}
+      <div class="col-sm-6 col-md-4 col-lg-3 img-thumbnail-div"><a data-fancybox="cl-group" href="{{ image }}"
+          target="img"><img src="{{ image }}" alt="..." class="img-fluid img-thumbnail"></a></div>
+      {% endfor %}
+    </div>
     {% endif %}
-
     <div class="row">
       {% if q %}
       <div class="col-md-8" style="margin-bottom: 1rem">
         Xem ảnh từ {{q-39}} đến {{q}} trong tổng số <strong>{{total}}</strong> ảnh.
       </div>
-      <div class="col-md-8" style="margin-bottom: 1rem;">
-        Có <strong>{{count}}</strong> ảnh của bạn, trong tổng số
-        <strong>{{total}}</strong> ảnh.
-      </div>
       {% endif %}
-      {% if count == 0 %}
+      {% if item == 0 %}
       <div class="col-md-8" style="margin-bottom: 1rem">
         Không tìm thấy ảnh nào của bạn. Bạn có thể tìm ảnh theo khuôn mặt.
       </div>
       {% else %}
-      {% if count != None and q == None %}
+      {% if count != 0 %}
       <div class="col-md-8" style="margin-bottom: 1rem;">
         Có <strong>{{count}}</strong> ảnh của bạn, trong tổng số
         <strong>{{total}}</strong> ảnh.

@@ -373,29 +373,6 @@
         <strong>{{total}}</strong> ảnh.
       </div>
       {% endif %}
-      <!-- <div class="col-md-4">
-        <nav aria-label="Page navigation">
-          <ul class="pagination" style="float: right">
-            <li class="page-item"><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=0"
-                aria-label="Previous"><span aria-hidden="true">«</span></a></li>
-            <li class="page-item "><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=0">1</a></li>
-            <li class="page-item "><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=1">2</a></li>
-            <li class="page-item"><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=2">3</a></li>
-            <li class="page-item "><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=3">4</a></li>
-            <li class="page-item "><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=4">5</a></li>
-            <li class="page-item"><a class="page-link" href="#">...</a></li>
-            <li class="page-item"><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=692"
-                aria-label="Next"><span aria-hidden="true">»</span></a></li>
-          </ul>
-        </nav>
-      </div> -->
     </div>
     <div class="row">
       {% for image in images.items %}
@@ -408,37 +385,6 @@
     Trang sau{% endif %} |
     {% if images.has_next %}<a href="{{ url_for('detail', page=images.next_num) }}">Trang sau &gt;&gt;</a>{% else
     %}Trang sau &gt;&gt;{% endif %}
-    <!-- {% if prev_url %}
-    <a href="{{ prev_url }}">Newer posts</a>
-    {% endif %}
-    {% if next_url %}
-    <a href="{{ next_url }}">Older posts</a>
-    {% endif %} -->
-    <!-- <div class="row">
-      <div class="col-md-12">
-        <nav aria-label="Page navigation">
-          <ul class="pagination" style="float: right">
-            <li class="page-item"><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=0"
-                aria-label="Previous"><span aria-hidden="true">«</span></a></li>
-            <li class="page-item "><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=0">1</a></li>
-            <li class="page-item "><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=1">2</a></li>
-            <li class="page-item"><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=2">3</a></li>
-            <li class="page-item "><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=3">4</a></li>
-            <li class="page-item "><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=4">5</a></li>
-            <li class="page-item"><a class="page-link" href="#">...</a></li>
-            <li class="page-item"><a class="page-link"
-                href="/photo?race_id=BDMM2021&amp;result=0&amp;bib_type=all&amp;bib=*&amp;page=692"
-                aria-label="Next"><span aria-hidden="true">»</span></a></li>
-          </ul>
-        </nav>
-      </div>
-    </div> -->
     <br><br><br><br>
     <hr>
   </div>

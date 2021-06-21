@@ -340,29 +340,44 @@ def get_link_image():
             db.session.commit()
             flash('Tạo image thành công', 'success')
 
-def bib_predict():
-    images = Image.query.filter(Image.album_id == 44).all()
+def bib_predict(id):
+    images = Image.query.filter(Image.album_id == id).all()
     for image in images:
-        image_url = [keras_ocr.tools.read(image.image_url)]
-        predictions = pipeline.recognize(image_url)
-        for idx, prediction in enumerate(predictions):
-            bibs = ''
-            for word, array in prediction:
-              tmp = re.compile(r"\b[0-9]{1,7}\b|\b[a-z][0-9]{2,}\b").findall(word)
-              if (tmp != []):
-                bib = tmp.pop()
-                bibs = bib +' '+ bibs
-        b = Bib(bib_feature=bibs, image_id = image.id)
-        db.session.add(b)
-        db.session.commit()
+        if bool(Bib.query.filter_by(image_id=image.id).first()) == False: 
+            image_url = [keras_ocr.tools.read(image.image_url)]
+            predictions = pipeline.recognize(image_url)
+            for idx, prediction in enumerate(predictions):
+                bibs = ''
+                for word, array in prediction:
+                  tmp = re.compile(r"\b[0-9]{1,7}\b|\b[a-z][0-9]{2,}\b").findall(word)
+                  if (tmp != []):
+                    bib = tmp.pop()
+                    bibs = bib +' '+ bibs
+            b = Bib(bib_feature=bibs, image_id = image.id)
+            db.session.add(b)
+            db.session.commit()
     flash('Đọc số BIB thành công', 'success')
 
-@app.route("/bib_predict", methods=['GET', 'POST'])
-# @login_required
-def predict():
+# @app.route("/bib_predict", methods=['GET', 'POST'])
+# # @login_required
+# def predict():
+#     if request.method == 'POST':
+#         bib_predict()
+#     return render_template('admin/bib_predict.html')
+
+@app.route("/album_manager", methods=['GET', 'POST'])
+def show_list():
+    if request.method == 'GET':
+        albums = Album.query.filter().order_by(Album.albumname)
+    return render_template('admin/album_manager.html', albums=albums)
+
+@app.route("/bib_predict/<id>", methods=['GET', 'POST'])
+def predict(id):
+    albums = Album.query.filter().order_by(Album.albumname)
     if request.method == 'POST':
-        bib_predict()
-    return render_template('admin/bib_predict.html')
+        album = Album.query.filter_by(id = id).first()
+        bib_predict(album.id)
+    return render_template('admin/album_manager.html', albums=albums)
 
 @app.route("/get_feature", methods=['GET', 'POST'])
 # @login_required
@@ -451,7 +466,7 @@ def home():
  
     return render_template('home.html', images=images, event=event,count=total,total=total)
 
-@app.route("/<string:slug>/", methods=['GET', 'POST'])
+@app.route("/events/<string:slug>/", methods=['GET', 'POST'])
 #@login_required
 def detail(slug):
     if request.method == "GET":
@@ -464,7 +479,8 @@ def detail(slug):
                 images = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).all()
                 count = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).count()
                 total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
-                return render_template('detail.html', images=images, event=event, count=count, bib=bib, total=total,slug=slug)
+                item=count
+                return render_template('detail.html', images=images, event=event, count=count, bib=bib, total=total,slug=slug,item=item)
     page = request.args.get('page', 1, type=int)
     per_page = 40
     event = Event.query.filter_by(slug=slug).first()
@@ -477,22 +493,22 @@ def detail(slug):
     indexs = []
     indexs_all = []
     if request.method == "POST":
-        st = time.time()
-        uploaded_file = request.files["img"]
-        uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
-        print(uploaded_file_path)
-        uploaded_file.save(uploaded_file_path)
-        uploaded_file_path
-        print(uploaded_file_path)
-        indexs, indexs_all, f = search_image(uploaded_file_path)
-        end = time.time()
-        len1 = len(indexs)
-        len2 = len(indexs_all)
-        t = end - st
-        
-        return render_template('detail.html', indexs=indexs, indexs_all=indexs_all, len1=len1, len2=len2, t=t, f=f, images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url, prev_url=prev_url)
- 
-    return render_template('detail.html', images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url, prev_url=prev_url,indexs_all=indexs_all)
+            st = time.time()
+            uploaded_file = request.files["img"]
+            uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
+            print(uploaded_file_path)
+            uploaded_file.save(uploaded_file_path)
+            uploaded_file_path
+            print(uploaded_file_path)
+            indexs, indexs_all, f = search_image(uploaded_file_path)
+            end = time.time()
+            len1 = len(indexs)
+            len2 = len(indexs_all)
+            t = end - st
+
+            return render_template('detail.html', indexs=indexs, indexs_all=indexs_all, len1=len1, len2=len2, t=t, f=f,     images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url,    prev_url=prev_url)
+    count = 0
+    return render_template('detail.html', images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url, prev_url=prev_url,count=count,indexs_all=indexs_all)
 
 
 @app.route("/index1")

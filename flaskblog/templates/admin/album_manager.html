@@ -138,7 +138,7 @@
     </div>
     <div class="cell" data-title="Kích hoạt">
       {% if album.status == 0 %}
-      <form method="post" action="/bib_predict">
+      <form method="post" action="/bib_predict/{{album.id}}">
         <button type="submit" name="bib_predict" value="bib_predict"> Dự đoán BIB và lưu </button>
       </form>
       {% endif %}
