@@ -1,29 +1,96 @@
 {% extends "layout.html" %}
 {% block content %}
+<style>
+  body {
+    background-color: #fbfbfb;
+    color: #000000;
+    font-weight: 300;
+  }
 
-<div class="form-wrapper">
-  <h2 class="title">Thêm đường dẫn album</h2>
+  .block-main {
+    margin: 6% 0% 0% 22%;
+    width: 60%;
+  }
 
-  <form method="POST" action="">
+  .form-check,
+  label {
+    color: rgb(21, 21, 24) !important;
+  }
 
-    <fieldset class="form-field">
-      {{ form.name.label }}
-      {{ form.name(size=20) }}
-    </fieldset>
+  input[type=text],
+  select {
+    width: 100%;
+    padding: 12px 10px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
 
-    <fieldset class="form-field">
-      {{ form.email.label }}
-      {{ form.email }}
-    </fieldset>
+  #submit {
+    background: linear-gradient(45deg, #0d4b72, #063D59);
+    box-shadow: 0px 4px 30px rgb(19 127 5.3%);
+    margin-top: 2px;
+    width: 20%;
+    border-radius: 4px;
+    color: white;
+    padding: 8px;
+    height: fit-content;
+    font-size: 16px;
+    margin-left: 40%;
+  }
 
-    <fieldset class="form-field">
-      {{ form.body.label }}
-      {{ form.body }}
-    </fieldset>
+  .title {
+    color: rgb(21, 21, 24)
+  }
+</style>
+<main class="block-main">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{category}}">
+    <span class="closebtn">&times;</span>
+    <strong>{{ message }}</strong>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  <script>
+    var close = document.getElementsByClassName("closebtn");
+    var i;
 
-    {{ form.submit }}
+    for (i = 0; i < close.length; i++) {
+      close[i].onclick = function () {
+        var div = this.parentElement;
+        div.style.opacity = "0";
+        setTimeout(function () { div.style.display = "none"; }, 600);
+      }
+    }
+  </script>
+  <div class="container" id="search-result">
+    <h2 class="title">Thêm đường dẫn album</h2>
 
-  </form>
-</div>
+    <form method="POST" action="">
+      {{ form.hidden_tag() }}
+
+      <p>
+        {{ form.event.label }}<br>
+        {{ form.event }}<br>
+      </p>
+      <p>
+        {{ form.albumname.label }}<br>
+        {{ form.albumname }}<br>
+      </p>
+
+      <p>
+        {{ form.album_url.label }}<br>
+        {{ form.album_url }}<br>
+      </p>
+      {{ form.submit }}
+
+    </form>
+  </div>
+</main>
 
 {% endblock content %}

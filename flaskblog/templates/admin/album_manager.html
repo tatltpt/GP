@@ -94,7 +94,7 @@
   .cell {
     padding: 6px 12px;
     display: table-cell;
-    white-space: nowrap;
+    column-width: 270px;
   }
 
   @media screen and (max-width: 580px) {
@@ -103,7 +103,59 @@
       display: block;
     }
   }
+
+  .alert.error {
+    padding: 20px;
+    background-color: #f44336;
+    color: white;
+    opacity: 1;
+    transition: opacity 0.6s;
+    margin-bottom: 15px;
+  }
+
+  .alert.success {
+    background-color: #04AA6D;
+  }
+
+  .alert.info {
+    background-color: #2196F3;
+  }
+
+  .alert.warning {
+    background-color: #ff9800;
+  }
+
+  .closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .closebtn:hover {
+    color: black;
+  }
+
+  .inline {
+    display: inline-block;
+    margin-right: 5px;
+  }
 </style>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{category}}">
+  <span class="closebtn">&times;</span>
+  <strong>{{ message }}</strong>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
 <div class="table">
 
   <div class="row header blue">
@@ -117,7 +169,7 @@
       Trạng thái
     </div>
     <div class="cell">
-      Kích hoạt
+      Thao tác
     </div>
   </div>
   {% for album in albums %}
@@ -127,19 +179,44 @@
       {{album.albumname}}
     </div>
     <div class="cell" data-title="Link album">
-      {{album.album_url}}
+      <a href="{{album.album_url}}" target="_blank" rel="noopener noreferrer">{{album.album_url}}</a>
     </div>
     <div class="cell" data-title="Trạng thái">
-      {% if album.status == 1 %}
-      Đã xử lý
-      {% else %}
-      Chưa xử lý
+      {% if album.status == 0 %}
+      Chưa crawl
+      {% elif album.status == 1%}
+      Chưa đọc BIB<br>
+      Chưa trích chọn đặc trưng
+      {% elif album.status == 2%}
+      Đã đọc BIB<br>
+      Chưa trích chọn đặc trưng
+      {% elif album.status == 3%}
+      Chưa đọc BIB<br>
+      Đã trích chọn đặc trưng
+      {% elif album.status == 4%}
+      Đã đọc BIB<br>
+      Đã trích chọn đặc trưng
       {% endif %}
     </div>
-    <div class="cell" data-title="Kích hoạt">
+    <div class="cell" data-title="Thao tác">
       {% if album.status == 0 %}
-      <form method="post" action="/bib_predict/{{album.id}}">
-        <button type="submit" name="bib_predict" value="bib_predict"> Dự đoán BIB và lưu </button>
+      <form method="post" action="/crawl_image/{{album.id}}">
+        <button type="submit" name="crawl_image" value="crawl_image"> Lưu link ảnh </button>
+      </form>
+      {% elif album.status == 1 %}
+      <form method="post" action="/bib_predict/{{album.id}}" class="inline">
+        <button type="submit" name="bib_predict" value="bib_predict"> Đọc BIB </button>
+      </form>
+      <form method="post" action="/get_feature/{{album.id}}" class="inline">
+        <button type="submit" name="getFeatures" value="getFeatures"> Lưu đặc trưng </button>
+      </form>
+      {% elif album.status == 2 %}
+      <form method="post" action="/get_feature/{{album.id}}">
+        <button type="submit" name="getFeatures" value="getFeatures"> Lưu đặc trưng </button>
+      </form>
+      {% elif album.status == 3 %}
+      <form method="post" action="/bib_predict/{{album.id}}" class="inline">
+        <button type="submit" name="bib_predict" value="bib_predict"> Đọc BIB </button>
       </form>
       {% endif %}
     </div>
@@ -147,3 +224,16 @@
   </div>
   {% endfor %}
 </div>
+
+<script>
+  var close = document.getElementsByClassName("closebtn");
+  var i;
+
+  for (i = 0; i < close.length; i++) {
+    close[i].onclick = function () {
+      var div = this.parentElement;
+      div.style.opacity = "0";
+      setTimeout(function () { div.style.display = "none"; }, 600);
+    }
+  }
+</script>

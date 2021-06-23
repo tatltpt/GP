@@ -31,12 +31,14 @@ from keras.layers import Flatten, MaxPooling2D
 import h5py
 from collections import OrderedDict
 import math
+import base64
 
 app.config['ALLOWED_EXTENSIONS'] = set(
     ['png', 'jpg', 'jpeg'])
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploaded')
 IMG_DIR = os.path.join(BASE_DIR, 'static', 'imgs')
+cover_default = '/static/imgs/event-default.jpg'
 
 WAITING = 0
 PROCESSING = 1
@@ -67,13 +69,15 @@ net = cv2.dnn.readNetFromDarknet(cfg, weight)
 l_names = net.getLayerNames()
 ol_names = [l_names[i[0]-1] for i in net.getUnconnectedOutLayers()]
 
+
 def detect_img(img):
     image_r = img
-    (H,W) = image_r.shape[:2]
+    (H, W) = image_r.shape[:2]
 
     # construct a blob from the input image, pass to the YOLO detector and
     # grab the bounding boxes and associated probabilities
-    blob = cv2.dnn.blobFromImage(image_r, 1/255.0, (416,416), swapRB=True, crop=False)
+    blob = cv2.dnn.blobFromImage(
+        image_r, 1/255.0, (416, 416), swapRB=True, crop=False)
     net.setInput(blob)
     layer_outputs = net.forward(ol_names)
 
@@ -92,14 +96,15 @@ def detect_img(img):
             confidence = scores[classID]
 
             if confidence > confidence_default:
-                (center_x, center_y, width, height) = (detection[0:4] * ([W, H, W, H])).astype("int")
+                (center_x, center_y, width, height) = (
+                    detection[0:4] * ([W, H, W, H])).astype("int")
                 x = int(center_x - (width/2))
                 y = int(center_y - (height/2))
                 if x < 0:
                     width = width - x
                     x = 0
                 if y < 0:
-                    height = height - y 
+                    height = height - y
                     y = 0
                 boxes.append([x, y, int(width), int(height)])
                 confidences.append(float(confidence))
@@ -107,9 +112,11 @@ def detect_img(img):
     idxs = cv2.dnn.NMSBoxes(boxes, confidences, confidence_default, threshold)
     return boxes, confidences, classIDs, idxs
 
+
 def cut_boxes(img, x, y, w, h):
     cuted = img[y:y+h, x:x+w]
     return cuted
+
 
 def check_arr(str, str1):
     a = []
@@ -131,17 +138,19 @@ def get_feature(img):
 
     features = model.predict(x)
 
-    max_pool_2d = MaxPooling2D(pool_size=(2,2), strides=(2,2))
+    max_pool_2d = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))
     features = max_pool_2d(features)
     features = Flatten()(features)
     return features
+
 
 def load_features(file_name):
     f = h5py.File(file_name, 'r')
     features = f['features'][:]
     image_paths = f['image_paths']
-    
+
     return features, image_paths
+
 
 def index_annoy(features, file_name):
     from annoy import AnnoyIndex
@@ -153,6 +162,7 @@ def index_annoy(features, file_name):
 
     t.build(10)  # 10 trees
     t.save(file_name)
+
 
 def search_feature(input_file):
     from annoy import AnnoyIndex
@@ -166,82 +176,91 @@ def search_feature(input_file):
 
     label = str(class_arr[0])[2:len(str(class_arr[0]))-1]
     print(label)
-    
+
     f = len(features_arr[0][0])
     face = AnnoyIndex(f, 'angular')
     body = AnnoyIndex(f, 'angular')
-    face.load('face.ann') # super fast, will just mmap the file
+    face.load('face.ann')  # super fast, will just mmap the file
     body.load('body.ann')
 
     images_all = []
     images_face = []
     images_body = []
     print('lay 10 chi muc', face.get_nns_by_item(0, 10))
-    print('features_arr',len(features_arr))
+    print('features_arr', len(features_arr))
     for i in range(len(features_arr)):
         imgs = []
         label = str(class_arr[i])[2:len(str(class_arr[i]))-1]
         if label == 'face':
-            print("lay 10 chi muc",face.get_nns_by_vector(features_arr[i][0], 10)) # will find the 1000 nearest neighbors
-            index_img, inclu = face.get_nns_by_vector(features_arr[i][0], 10, include_distances=True) 
+            # will find the 1000 nearest neighbors
+            print("lay 10 chi muc", face.get_nns_by_vector(
+                features_arr[i][0], 10))
+            index_img, inclu = face.get_nns_by_vector(
+                features_arr[i][0], 10, include_distances=True)
             print("khoang cách", inclu)
             for i in range(len(inclu)):
                 if inclu[i] < 0.8:
                     print(index_img[i])
-                    path = str(image_paths[index_img[i]])[2:len(str(image_paths[index_img[i]]))-1]
+                    path = str(image_paths[index_img[i]])[
+                        2:len(str(image_paths[index_img[i]]))-1]
                     imgs.append(path)
-            imgs = list( OrderedDict.fromkeys(imgs) )
+            imgs = list(OrderedDict.fromkeys(imgs))
             images_face = images_face + imgs
-            images_face = list( OrderedDict.fromkeys(images_face) )
+            images_face = list(OrderedDict.fromkeys(images_face))
             print("so anh face", images_face)
 
         if label == 'body':
-            print("lay 10 chi muc",body.get_nns_by_vector(features_arr[i][0], 10)) # will find the 1000 nearest neighbors
-            index_img, inclu = body.get_nns_by_vector(features_arr[i][0], 10, include_distances=True) 
+            # will find the 1000 nearest neighbors
+            print("lay 10 chi muc", body.get_nns_by_vector(
+                features_arr[i][0], 10))
+            index_img, inclu = body.get_nns_by_vector(
+                features_arr[i][0], 10, include_distances=True)
             print("khoang cách", inclu)
             for i in range(len(inclu)):
                 if inclu[i] < 0.8:
                     print(index_img[i])
-                    path = str(image_paths[index_img[i]])[2:len(str(image_paths[index_img[i]]))-1]
+                    path = str(image_paths[index_img[i]])[
+                        2:len(str(image_paths[index_img[i]]))-1]
                     imgs.append(path)
-            imgs = list( OrderedDict.fromkeys(imgs) )
+            imgs = list(OrderedDict.fromkeys(imgs))
             images_body = images_body + imgs
-            images_body = list( OrderedDict.fromkeys(images_body) )
+            images_body = list(OrderedDict.fromkeys(images_body))
             print("so anh body", images_body)
 
     images_all = images_face + images_body
-    images_all = list( OrderedDict.fromkeys(images_all) )
+    images_all = list(OrderedDict.fromkeys(images_all))
     images = check_arr(images_body, images_face)
     print("dong 356", images_all)
     print("images", images)
     return images, images_all
+
 
 def search_image(path):
     input_i = cv2.imread(path)
     boxes, confidences, classIDs, idxs = detect_img(input_i)
     indexs = []
     indexs_all = []
-    if len(idxs) > 0:          
+    if len(idxs) > 0:
         features_arr = []
-        class_arr = [] 
+        class_arr = []
         for i in idxs.flatten():
             if (labels[classIDs[i]] == 'face' or labels[classIDs[i]] == 'body'):
-                (x,y) = (boxes[i][0], boxes[i][1])
-                (w,h) = (boxes[i][2], boxes[i][3])
+                (x, y) = (boxes[i][0], boxes[i][1])
+                (w, h) = (boxes[i][2], boxes[i][3])
                 box = cut_boxes(input_i, x, y, w, h)
                 fe = get_feature(box)
                 features_arr.append(fe)
                 class_arr.append(labels[classIDs[i]])
                 print(labels[classIDs[i]])
-            else: 
+            else:
                 continue
     with h5py.File('feature.h5',  "a") as f:
-            if list(f.keys()) != []:
-                if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'labels':
-                    del f['features']
-                    del f['labels']
-            f.create_dataset('features', data=features_arr)
-            f.create_dataset('labels', data=class_arr)
+        if list(f.keys()) != []:
+            if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'labels':
+                del f['features']
+                del f['labels']
+        f.create_dataset('features', data=features_arr)
+        f.create_dataset('labels', data=class_arr)
 
     f = h5py.File('feature.h5', 'r')
     features_arr = f['features'][:]
@@ -249,9 +268,11 @@ def search_image(path):
 
     return indexs, indexs_all, len(features_arr)
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
 
 def download(url):
     try:
@@ -269,14 +290,16 @@ def download(url):
         file_name = None
     return file_name
 
+
 def soup_page(page):
     try:
-      return BeautifulSoup(page, 'lxml')
+        return BeautifulSoup(page, 'lxml')
     except:
-      print("Cannot fetch the requested page")
+        print("Cannot fetch the requested page")
+
 
 def get_link_album():
-    
+
     # Open album page
     url_input = 'https://imsports.vn/giai-chay-nam-2021-ac1925.html'
     albums_page = urllib.request.urlopen(url_input)
@@ -286,75 +309,97 @@ def get_link_album():
     find_all_list = soup.find_all('h3', attrs={'class': 'product-name'})
     albums_lists = []
     if lastpage != []:
-      x = int(lastpage['href'].split("?page=",1)[1])
-      allpaging = []
-      for i in range(1,x+1):
-        url =  url_input + '?page=%d'%i
-        allpaging.append(url)
-      for k in range(0,len(allpaging)):
-        albums_page = urllib.request.urlopen(allpaging[k])
-        soup = soup_page(albums_page)
-        albums_list = soup.find_all('h3', attrs={'class': 'product-name'})
-        albums_lists = albums_lists + albums_list
-    else: 
-      albums_lists = find_all_list
+        x = int(lastpage['href'].split("?page=", 1)[1])
+        allpaging = []
+        for i in range(1, x+1):
+            url = url_input + '?page=%d' % i
+            allpaging.append(url)
+        for k in range(0, len(allpaging)):
+            albums_page = urllib.request.urlopen(allpaging[k])
+            soup = soup_page(albums_page)
+            albums_list = soup.find_all('h3', attrs={'class': 'product-name'})
+            albums_lists = albums_lists + albums_list
+    else:
+        albums_lists = find_all_list
 
     for x in range(0, len(albums_lists)):
-      albums_lists[x] = albums_lists[x].find('a')
+        albums_lists[x] = albums_lists[x].find('a')
     for l in albums_lists:
-        album = Album(albumname=l['title'], album_url='https://imsports.vn'+l['href'] ,user_id = 1, event_id = 1)
+        album = Album(
+            albumname=l['title'], album_url='https://imsports.vn'+l['href'], user_id=1, event_id=1)
         db.session.add(album)
         db.session.commit()
         flash('Tạo album thành công', 'success')
 
+
 def load_page(url):
-    driver = webdriver.Chrome('/home/tuta/test/crawl/chromedriver',options=sln_options)
+    driver = webdriver.Chrome(
+        '/home/tuta/test/crawl/chromedriver', options=sln_options)
     driver.get(url)
     last_height = driver.execute_script("return document.body.scrollHeight")
     while True:
-      driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-      time.sleep(1.0)
-      new_height = driver.execute_script("return document.body.scrollHeight")
-      if new_height == last_height:
-        break
-      last_height = new_height
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1.0)
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            break
+        last_height = new_height
     return driver
 
-def get_link_image():
 
-    albums = Album.query.filter().all()
-    for al in albums:
-        if al.status == 0:
+def get_link_image(id):
+    album = Album.query.filter(Album.id == id).first()
+    photo_page = load_page(album.album_url)
+    # Retrieve content of the album
+    soup = soup_page(photo_page.page_source)
+    photo_list = soup.find_all('div', attrs={'class': 'itemImgGll'})
+    k = 0
+    for y in range(len(photo_list)):
+        img = photo_list[y].find('a')
+        k += 1
+        image = Image(imagename=album.albumname+' '+str(k),
+                      album_id=album.id, image_url=img.get('href'), status=0)
+        db.session.add(image)
+    db.session.commit()
+    flash('Crawl image thành công', 'success')
 
-            photo_page = load_page(al.album_url)
-            # Retrieve content of the album
-            soup = soup_page(photo_page.page_source)
-            photo_list = soup.find_all('div', attrs={'class': 'itemImgGll'})
-            k = 0
-            for y in range(len(photo_list)):
-                img = photo_list[y].find('a')
-                k+=1
-                image = Image(imagename=al.albumname+' '+str(k), album_id = al.id, image_url = img.get('href'),status = 0)
-                db.session.add(image)
-            al.status = 1
-            db.session.commit()
-            flash('Tạo image thành công', 'success')
+
+@app.route("/crawl_image/<id>", methods=['GET', 'POST'])
+def crawl_image(id):
+    if request.method == 'POST':
+        album = Album.query.filter_by(id=id).first()
+        get_link_image(album.id)
+        album.status = 1
+        db.session.commit()
+        return redirect(url_for('show_list'))
+
+
+@app.route("/crawl_album", methods=['GET', 'POST'])
+@login_required
+def crawl_album():
+    if request.method == 'POST':
+        get_link_album()
+    return render_template('admin/crawl_album.html')
+
 
 def bib_predict(id):
     images = Image.query.filter(Image.album_id == id).all()
     for image in images:
-        if bool(Bib.query.filter_by(image_id=image.id).first()) == False: 
+        if bool(Bib.query.filter_by(image_id=image.id).first()) == False:
             image_url = [keras_ocr.tools.read(image.image_url)]
             predictions = pipeline.recognize(image_url)
             for idx, prediction in enumerate(predictions):
                 bibs = ''
                 for word, array in prediction:
-                  tmp = re.compile(r"\b[0-9]{1,7}\b|\b[a-z][0-9]{2,}\b").findall(word)
-                  if (tmp != []):
-                    bib = tmp.pop()
-                    bibs = bib +' '+ bibs
-            b = Bib(bib_feature=bibs, image_id = image.id)
+                    tmp = re.compile(
+                        r"\b[0-9]{1,7}\b|\b[a-z][0-9]{2,}\b").findall(word)
+                    if (tmp != []):
+                        bib = tmp.pop()
+                        bibs = bib + ' ' + bibs
+            b = Bib(bib_feature=bibs, image_id=image.id)
             db.session.add(b)
+            image.status = 1
             db.session.commit()
     flash('Đọc số BIB thành công', 'success')
 
@@ -365,49 +410,123 @@ def bib_predict(id):
 #         bib_predict()
 #     return render_template('admin/bib_predict.html')
 
+def save_features_img(id):
+    features_face = []
+    face_paths = []
+    features_body = []
+    body_paths = []
+    images = Image.query.filter(Image.album_id == id).all()
+    for image in images:
+        print(image.image_url)
+        resp = urllib.request.urlopen(image.image_url)
+        img = np.asarray(bytearray(resp.read()), dtype="uint8")
+        img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+        boxes, confidences, classIDs, idxs = detect_img(img)
+        if len(idxs) > 0:
+            for i in idxs.flatten():
+                if (labels[classIDs[i]] == 'face'):
+                    (x, y) = (boxes[i][0], boxes[i][1])
+                    (w, h) = (boxes[i][2], boxes[i][3])
+                    box = cut_boxes(img, x, y, w, h)
+                    fe = get_feature(box)
+                    features_face.append(fe)
+                    face_paths.append(image.image_url)
+                if (labels[classIDs[i]] == 'body'):
+                    (x, y) = (boxes[i][0], boxes[i][1])
+                    (w, h) = (boxes[i][2], boxes[i][3])
+                    box = cut_boxes(img, x, y, w, h)
+                    fe = get_feature(box)
+                    features_body.append(fe)
+                    body_paths.append(image.image_url)
+                else:
+                    continue
+        with h5py.File('face.h5',  "a") as f:
+            if list(f.keys()) != []:
+                if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'image_paths':
+                    del f['features']
+                    del f['image_paths']
+            f.create_dataset('features', data=features_face)
+            f.create_dataset('image_paths', data=face_paths)
+            f.close()
+
+        with h5py.File('body.h5',  "a") as f:
+            if list(f.keys()) != []:
+                if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'image_paths':
+                    del f['features']
+                    del f['image_paths']
+            f.create_dataset('features', data=features_body)
+            f.create_dataset('image_paths', data=body_paths)
+            f.close()
+        features, image_paths = load_features(file_name='face.h5')
+        features2, image_paths2 = load_features(file_name='body.h5')
+        print(features[9])
+        print('path', image_paths[9])
+        index_annoy(features, file_name='face.ann')
+        index_annoy(features2, file_name='body.ann')
+    flash('Lấy đặc trưng thành công', 'success')
+
 @app.route("/album_manager", methods=['GET', 'POST'])
+@login_required
 def show_list():
     if request.method == 'GET':
-        albums = Album.query.filter().order_by(Album.albumname)
+        albums = Album.query.filter().order_by(Album.id.desc())
     return render_template('admin/album_manager.html', albums=albums)
+
 
 @app.route("/bib_predict/<id>", methods=['GET', 'POST'])
 def predict(id):
-    albums = Album.query.filter().order_by(Album.albumname)
     if request.method == 'POST':
-        album = Album.query.filter_by(id = id).first()
+        album = Album.query.filter_by(id=id).first()
         bib_predict(album.id)
-    return render_template('admin/album_manager.html', albums=albums)
+        if album.status == 1: 
+            album.status = 2
+        else:
+            album.status = 4
+        db.session.commit()
+        return redirect(url_for('show_list'))
+
+
+@app.route("/get_feature/<id>", methods=['GET', 'POST'])
+def getFeatures(id):
+    if request.method == 'POST':
+        album = Album.query.filter_by(id=id).first()
+        save_features_img(album.id)
+        if album.status == 1:
+            album.status = 3
+        else:
+            album.status = 4
+        db.session.commit()
+        return redirect(url_for('show_list'))
 
 @app.route("/get_feature", methods=['GET', 'POST'])
 # @login_required
 def save_feature():
     if request.method == 'POST':
-        albums = Album.query.filter(Album.event_id == 4).all()
+        albums = Album.query.filter(Album.id == 44).all()
         features_face = []
         face_paths = []
         features_body = []
         body_paths = []
         for album in albums:
-            images = Image.query.filter(Image.album_id == album.id).all()            
+            images = Image.query.filter(Image.album_id == album.id).all()
             for image in images:
-                print(image.image_url)        
+                print(image.image_url)
                 resp = urllib.request.urlopen(image.image_url)
                 img = np.asarray(bytearray(resp.read()), dtype="uint8")
                 img = cv2.imdecode(img, cv2.IMREAD_COLOR)
                 boxes, confidences, classIDs, idxs = detect_img(img)
-                if len(idxs) > 0:                
+                if len(idxs) > 0:
                     for i in idxs.flatten():
                         if (labels[classIDs[i]] == 'face'):
-                            (x,y) = (boxes[i][0], boxes[i][1])
-                            (w,h) = (boxes[i][2], boxes[i][3])
+                            (x, y) = (boxes[i][0], boxes[i][1])
+                            (w, h) = (boxes[i][2], boxes[i][3])
                             box = cut_boxes(img, x, y, w, h)
                             fe = get_feature(box)
                             features_face.append(fe)
                             face_paths.append(image.image_url)
                         if (labels[classIDs[i]] == 'body'):
-                            (x,y) = (boxes[i][0], boxes[i][1])
-                            (w,h) = (boxes[i][2], boxes[i][3])
+                            (x, y) = (boxes[i][0], boxes[i][1])
+                            (w, h) = (boxes[i][2], boxes[i][3])
                             box = cut_boxes(img, x, y, w, h)
                             fe = get_feature(box)
                             features_body.append(fe)
@@ -434,37 +553,45 @@ def save_feature():
         features, image_paths = load_features(file_name='face.h5')
         features2, image_paths2 = load_features(file_name='body.h5')
         print(features[9])
-        print('path',image_paths[9])
+        print('path', image_paths[9])
         index_annoy(features, file_name='face.ann')
         index_annoy(features2, file_name='body.ann')
     return render_template('admin/get_feature.html')
 
-@app.route("/", methods=['GET', 'POST'])
-@login_required
-def home():
-    if request.method == "GET":
-        if(request.args):
-            if "bib" in request.args.keys():
-                bib = request.args.get('bib')
-                search = "%{}%".format(bib)
-                albums = Album.query.filter(Album.event_id == 4).all()
-                event = Event.query.filter_by(id = 4).first()
-                images = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).all()
-                count = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).count()
-                total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
-                return render_template('home.html', images=images, event=event, count=count, bib=bib, total=total)
-    albums = Album.query.filter(Album.event_id == 4).all()
-    images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).all()
-    event = Event.query.filter_by(id = 4).first()
-    total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
-    if request.method == "POST":
-        if "img" in request.files:
-            uploaded_file = request.files["img"]
-            uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
-            uploaded_file.save(uploaded_file_path)
-            uploaded_file_path
- 
-    return render_template('home.html', images=images, event=event,count=total,total=total)
+
+# @app.route("/", methods=['GET', 'POST'])
+# @login_required
+# def home():
+#     if request.method == "GET":
+#         if(request.args):
+#             if "bib" in request.args.keys():
+#                 bib = request.args.get('bib')
+#                 search = "%{}%".format(bib)
+#                 albums = Album.query.filter(Album.event_id == 4).all()
+#                 event = Event.query.filter_by(id=4).first()
+#                 images = Image.query.join(Bib).filter(Image.album_id.in_(
+#                     [p.id for p in albums]), Bib.bib_feature.like(search)).all()
+#                 count = Image.query.join(Bib).filter(Image.album_id.in_(
+#                     [p.id for p in albums]), Bib.bib_feature.like(search)).count()
+#                 total = Image.query.filter(
+#                     Image.album_id.in_([p.id for p in albums])).count()
+#                 return render_template('home.html', images=images, event=event, count=count, bib=bib, total=total)
+#     albums = Album.query.filter(Album.event_id == 4).all()
+#     images = Image.query.filter(
+#         Image.album_id.in_([p.id for p in albums])).all()
+#     event = Event.query.filter_by(id=4).first()
+#     total = Image.query.filter(
+#         Image.album_id.in_([p.id for p in albums])).count()
+#     if request.method == "POST":
+#         if "img" in request.files:
+#             uploaded_file = request.files["img"]
+#             uploaded_file_path = os.path.join(
+#                 UPLOAD_DIR, uploaded_file.filename)
+#             uploaded_file.save(uploaded_file_path)
+#             uploaded_file_path
+
+#     return render_template('home.html', images=images, event=event, count=total, total=total)
+
 
 @app.route("/events/<string:slug>/", methods=['GET', 'POST'])
 def detail(slug):
@@ -473,140 +600,112 @@ def detail(slug):
             if "bib" in request.args.keys():
                 bib = request.args.get('bib')
                 search = "%{}%".format(bib)
-                event = Event.query.filter_by(slug = slug).first()
-                albums = Album.query.filter(Album.event_id.in_([event.id])).all()
-                images = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).all()
-                count = Image.query.join(Bib).filter(Image.album_id.in_([p.id for p in albums]), Bib.bib_feature.like(search)).count()
-                total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
-                item=count
-                return render_template('detail.html', images=images, event=event, count=count, bib=bib, total=total,slug=slug,item=item)
+                event = Event.query.filter_by(slug=slug).first()
+                albums = Album.query.filter(
+                    Album.event_id.in_([event.id])).all()
+                images = Image.query.join(Bib).filter(Image.album_id.in_(
+                    [p.id for p in albums]), Bib.bib_feature.like(search)).all()
+                count = Image.query.join(Bib).filter(Image.album_id.in_(
+                    [p.id for p in albums]), Bib.bib_feature.like(search)).count()
+                total = Image.query.filter(
+                    Image.album_id.in_([p.id for p in albums])).count()
+                item = count
+                check = 0
+                return render_template('detail.html', images=images, event=event, count=count, bib=bib, total=total, slug=slug, item=item, check=check)
     page = request.args.get('page', 1, type=int)
     per_page = 40
     event = Event.query.filter_by(slug=slug).first()
     albums = Album.query.filter(Album.event_id.in_([event.id])).all()
-    images = Image.query.filter(Image.album_id.in_([p.id for p in albums])).paginate(page,per_page,error_out=False)
-    next_url = url_for('detail', slug=slug, page=images.next_num) if images.has_next else None
-    prev_url = url_for('detail', slug=slug, page=images.prev_num) if images.has_prev else None
-    total = Image.query.filter(Image.album_id.in_([p.id for p in albums])).count()
+    print('album', albums)
+    if albums == []:
+        return render_template('empty.html', event=event)
+    images = Image.query.filter(Image.album_id.in_(
+        [p.id for p in albums])).paginate(page, per_page, error_out=False)
+    next_url = url_for('detail', slug=slug,
+                       page=images.next_num) if images.has_next else None
+    prev_url = url_for('detail', slug=slug,
+                       page=images.prev_num) if images.has_prev else None
+    total = Image.query.filter(
+        Image.album_id.in_([p.id for p in albums])).count()
 
     indexs = []
     indexs_all = []
     if request.method == "POST":
+        if "img" in request.files:
             st = time.time()
             uploaded_file = request.files["img"]
             uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
-            print(uploaded_file_path)
+            print("uploaded_file_path", uploaded_file_path)
             uploaded_file.save(uploaded_file_path)
-            uploaded_file_path
             print(uploaded_file_path)
             indexs, indexs_all, f = search_image(uploaded_file_path)
             end = time.time()
             len1 = len(indexs)
             len2 = len(indexs_all)
             t = end - st
-
-            return render_template('detail.html', indexs=indexs, indexs_all=indexs_all, len1=len1, len2=len2, t=t, f=f,     images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url,    prev_url=prev_url)
+            check = 1
+            return render_template('detail.html', indexs=indexs, indexs_all=indexs_all, len1=len1, len2=len2, t=t, f=f, images=images.items, event=event, q=(images.next_num-1)*per_page, total=total, slug=slug, check=check, next_url=next_url,    prev_url=prev_url)
+    # if request.method == "POST":
+    #     if "img" in request.files:
+    #         uploaded_file = request.files["img"]
+    #         uploaded_file_path = os.path.join(
+    #             UPLOAD_DIR, uploaded_file.filename)
+    #         uploaded_file.save(uploaded_file_path)
+    #         uploaded_file_path
     count = 0
-    return render_template('detail.html', images=images.items, event=event,q=(images.next_num-1)*per_page,total=total,slug=slug,next_url=next_url, prev_url=prev_url,count=count,indexs_all=indexs_all)
+    check = 0
+    return render_template('detail.html', images=images.items, event=event, q=(images.next_num-1)*per_page, total=total, slug=slug, next_url=next_url, prev_url=prev_url, count=count, indexs_all=indexs_all, check=check)
 
 
-@app.route("/index1")
-@login_required
-def index1():
-    return render_template('index1.html', title='About')
+def not_found():
+    return render_template('404.html')
 
-@app.route("/ajaxfile",methods=["POST","GET"])
-def ajaxfile():
-    try:
-        
-        if request.method == 'POST':
-            draw = request.form['draw'] 
-            row = int(request.form['start'])
-            rowperpage = int(request.form['length'])
-            searchValue = request.form["search[value]"]
-            print(draw)
-            print(row)
-            print(rowperpage)
-            print(searchValue)
- 
-            ## Total number of records without filtering
-            cursor.execute("select count(*) as allcount from employee")
-            rsallcount = cursor.fetchone()
-            totalRecords = rsallcount['allcount']
-            print(totalRecords) 
- 
-            ## Total number of records with filtering
-            likeString = "%" + searchValue +"%"
-            cursor.execute("SELECT count(*) as allcount from employee WHERE name LIKE %s OR position LIKE %s OR office LIKE %s", (likeString, likeString, likeString))
-            rsallcount = cursor.fetchone()
-            totalRecordwithFilter = rsallcount['allcount']
-            print(totalRecordwithFilter) 
- 
-            ## Fetch records
-            if searchValue=='':
-                cursor.execute("SELECT * FROM employee ORDER BY name asc limit %s, %s;", (row, rowperpage))
-                employeelist = cursor.fetchall()
-            else:        
-                cursor.execute("SELECT * FROM employee WHERE name LIKE %s OR position LIKE %s OR office LIKE %s limit %s, %s;", (likeString, likeString, likeString, row, rowperpage))
-                employeelist = cursor.fetchall()
- 
-            data = []
-            for row in employeelist:
-                data.append({
-                    'name': row['name'],
-                    'position': row['position'],
-                    'age': row['age'],
-                    'salary': row['salary'],
-                    'office': row['office'],
-                })
- 
-            response = {
-                'draw': draw,
-                'iTotalRecords': totalRecords,
-                'iTotalDisplayRecords': totalRecordwithFilter,
-                'aaData': data,
-            }
-            return jsonify(response)
-    except Exception as e:
-        print(e)
 
+@app.route("/", methods=['GET', 'POST'])
 @app.route("/events")
+# @login_required
 def events():
+
     if request.method == "GET":
         if(request.args):
             if "q" in request.args.keys():
                 q = request.args.get('q')
                 search = "%{}%".format(q)
-                events = Event.query.filter(Event.eventname.like(search) | Event.place.like(search) | Event.description.like(search)).all()
+                events = Event.query.filter(Event.eventname.like(search) | Event.place.like(
+                    search) | Event.description.like(search)).all()
                 res = []
                 for event in events:
-                    album = Album.query.filter(Album.event_id.in_([event.id])).first()
-                    image = Image.query.filter(Image.album_id.in_([album.id])).first()
                     r = {
                         'eventname': event.eventname,
                         'date': event.date,
                         'place': event.place,
                         'description': event.description,
-                        'image': image.image_url,
-                        'slug' : event.slug,
+                        'image': event.cover_img,
+                        'slug': event.slug,
                     }
                     res.append(r)
+                    print('===========', r)
                 return render_template('events.html', title='events', res=res, q=q)
     events = Event.query.filter().all()
     res = []
     for event in events:
-        album = Album.query.filter(Album.event_id.in_([event.id])).first()
-        image = Image.query.filter(Image.album_id.in_([album.id])).first()
+        uploaded_file_path = event.cover_img
+        print('===========', event.cover_img)
+        if event.id > 5:
+            #uploaded_file_path = os.path.join(UPLOAD_DIR, event.cover_img)
+            print('===========', event.id)
         r = {
             'eventname': event.eventname,
             'date': event.date,
             'place': event.place,
             'description': event.description,
-            'image': image.image_url,
-            'slug' : event.slug,
+            'image': uploaded_file_path,
+            'slug': event.slug,
         }
         res.append(r)
+        print('===========', r)
     return render_template('events.html', title='events', res=res)
+
 
 @app.route("/profile")
 @login_required
@@ -629,53 +728,79 @@ def register():
                     email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        flash('Your account has been created! You are now able to log in', 'success')
+        flash('Tạo tài khoản thành công.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
 
 @app.route("/create_event", methods=['GET', 'POST'])
 @login_required
 def create_event():
-    print("===========")
     form = EventForm()
     if form.validate_on_submit():
-        event = Event(eventname=form.eventname.data,date=form.date.data, place=form.place.data,description=form.description.data,slug=slugify(form.eventname.data))
+        
+        event = Event(eventname=form.eventname.data, date=form.date.data, place=form.place.data,
+                      description=form.description.data, slug=slugify(form.eventname.data), status=0, user_id=current_user.id, cover_img=cover_default)
         db.session.add(event)
-        print("adddd")
         db.session.commit()
-        print("committtt")
         flash('Tạo sự kiện thành công', 'success')
         return redirect(url_for('create_event'))
+    
     return render_template('create_event.html', title='create_event', form=form)
+
+
+@app.route("/update_event/<string:slug>/", methods=['GET', 'POST'])
+@login_required
+def update_event(slug):
+    form = EventForm()
+    event = Event.query.filter_by(slug=slug).first()
+    form.eventname.data = event.eventname
+    form.date.data = event.date
+    form.place.data = event.place
+    form.description.data = event.description
+    if form.validate_on_submit():
+
+        event = Event(eventname=form.eventname.data, date=form.date.data, place=form.place.data,
+                      description=form.description.data, slug=slugify(form.eventname.data), status=0, user_id=current_user.id, cover_img=cover_default)
+        db.session.add(event)
+        db.session.commit()
+        flash('Sửa sự kiện thành công', 'success')
+        return redirect(url_for('create_event'))
+
+    return render_template('create_event.html', title='upload_event', form=form)
 
 @app.route("/create_album", methods=['GET', 'POST'])
 @login_required
 def create_album():
-    if request.method == 'POST':
-        get_link_album()
-    return render_template('admin/create_album.html')
+    form = AlbumForm()
+    if form.validate_on_submit():
+        event = Event.query.filter_by(
+            eventname=form.event.data.eventname).first()
+        album = Album(event_id=event.id, albumname=form.albumname.data,
+                      album_url=form.album_url.data, user_id=current_user.id, status=0)
+        db.session.add(album)
+        db.session.commit()
+        flash('Thêm đường dẫn thành công. Chờ quản trị viên xử lý', 'success')
+        return redirect(url_for('create_album'))
+    return render_template('create_album.html', title='create_album', form=form)
 
-@app.route("/crawl_image", methods=['GET', 'POST'])
-# @login_required
-def crawl_image():
-    if request.method == 'POST':
-        get_link_image()
-    return render_template('admin/crawl_image.html')
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('events'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home'))
+            return redirect(next_page) if next_page else redirect(url_for('events'))
         else:
-            flash('Login Unsuccessful. Please check email and password', 'danger')
+            flash(
+                'Đăng nhập thất bại. Vui lòng kiểm tra lại tên đăng nhập, mật khẩu', 'danger')
     return render_template('login.html', title='Login', form=form)
+
 
 @app.route("/update_pass", methods=['POST'])
 @login_required
@@ -697,7 +822,7 @@ def update_infor():
             data = request.form['name']
             user = User.query.filter_by(id=current_user.id).first()
             user.name = data
-            db.session.commit()    
+            db.session.commit()
     return redirect(url_for('profile'))
 
 
@@ -719,7 +844,8 @@ def update_avatar():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('home'))
+    return redirect(url_for('events'))
+
 
 def save_image(file):
     path = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '_' + \

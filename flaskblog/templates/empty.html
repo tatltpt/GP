@@ -320,8 +320,9 @@
       }
     </style>
     <h3>{{event["eventname"]}}</h3>
-
-    <form class="search-form form-inline" enctype="multipart/form-data" action="/events/{{slug}}/" method=""
+    <div style="font-size: 15px;">Sự kiện chưa có ảnh</div>
+    <div style="font-size: 15px; margin-top: 20px;"><a href="/create_album" style="font-size: 15px; margin-top: 20px;">Hãy thêm album</a></div>
+    <!-- <form class="search-form form-inline" enctype="multipart/form-data" action="/events/{{slug}}/" method=""
       id="form-search" style="margin-bottom: 10px">
       <ul class="nav-tab" style="overflow: hidden">
         {% if bib != None %}
@@ -360,10 +361,10 @@
           ảnh</button>
       </div>
       {% endif %}
-    </form>
-    
+    </form> -->
 
-    {% if indexs_all != [] and check == 1 %}
+
+    <!-- {% if indexs_all != [] and check == 1 %}
     <div style="height: 60px; font-weight: bold; color: #666; font-size: 20px;">Kết quả tìm kiếm ({{ len1 }})</div>
     <div class="row">
       {% for image in indexs %}
@@ -400,7 +401,7 @@
       {% endif %}
       {% endif %}
 
-      
+
       <div class="col-md-4">
         <nav aria-label="Page navigation">
           <ul class="pagination" style="float: right">
@@ -443,7 +444,7 @@
       </div>
     </div>
     {% endif %}
-    <br><br><br><br>
+    <br><br><br><br> -->
     <hr>
   </div>
 </main>

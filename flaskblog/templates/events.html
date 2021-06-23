@@ -1374,6 +1374,12 @@
 
                   </div>
                 </a>
+                {% if current_user.is_anonymous == False and current_user.id == user.id%}
+                <div>
+                  <div>Edit</div>
+                  <div>Delete</div>
+                </div>
+                {% endif %}
               </div>
             </div>
             {% endfor %}

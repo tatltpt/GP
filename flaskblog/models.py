@@ -22,7 +22,7 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
-                          default=datetime.utcnow)
+                           default=datetime.utcnow)
     events = relationship("Event")
     albums = relationship("Album")
 
@@ -42,10 +42,12 @@ class Event(db.Model):
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
-                          default=datetime.utcnow)
+                           default=datetime.utcnow)
+    cover_img = db.Column(db.String(255), nullable=False)
     albums = relationship("Album")
+
     def __repr__(self):
-        return f"Event('{self.id}', '{self.eventname}', '{self.place}', '{self.description}', '{self.status}', '{self.slug}', '{self.user_id}', '{self.created_at}', '{self.updated_at}')"
+        return f"Event('{self.id}', '{self.eventname}', '{self.place}', '{self.description}', '{self.status}', '{self.slug}', '{self.user_id}', '{self.created_at}', '{self.updated_at}', '{self.cover_img}')"
 
 
 class Album(db.Model):
@@ -58,7 +60,7 @@ class Album(db.Model):
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
-                          default=datetime.utcnow)
+                           default=datetime.utcnow)
     images = relationship("Image")
 
     def __repr__(self):
@@ -74,7 +76,7 @@ class Image(db.Model):
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
-                          default=datetime.utcnow)
+                           default=datetime.utcnow)
     features = relationship("Feature")
     bibs = relationship("Bib")
 
@@ -94,7 +96,7 @@ class Feature(db.Model):
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
-                          default=datetime.utcnow)
+                           default=datetime.utcnow)
 
     def __repr__(self):
         return f"Feature('{self.id}', '{self.body_coordinate}', '{self.body_feature}', '{self.head_coordinate}', '{self.head_feature}', '{self.upper_coordinate}', '{self.upper_feature}', '{self.image_id}', '{self.created_at}', '{self.updated_at}')"
@@ -107,7 +109,7 @@ class Bib(db.Model):
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
-                          default=datetime.utcnow)
+                           default=datetime.utcnow)
 
     def __repr__(self):
         return f"Bib('{self.id}', '{self.bib_feature}', '{self.image_id}', '{self.created_at}', '{self.updated_at}')"
