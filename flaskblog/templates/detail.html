@@ -274,6 +274,10 @@
     background: transparent;
     text-align: center;
   }
+
+  h4 {
+    font-size: 14px;
+  }
 </style>
 
 <main class="block-main">
@@ -361,7 +365,7 @@
       </div>
       {% endif %}
     </form>
-    
+
 
     {% if indexs_all != [] and check == 1 %}
     <div style="height: 60px; font-weight: bold; color: #666; font-size: 20px;">Kết quả tìm kiếm ({{ len1 }})</div>
@@ -384,23 +388,24 @@
     <div class="row">
       {% if q %}
       <div class="col-md-8" style="margin-bottom: 1rem">
-        Xem ảnh từ {{q-39}} đến {{q}} trong tổng số <strong>{{total}}</strong> ảnh.
+        <h4>Xem ảnh từ {{q-39}} đến {{q}} trong tổng số <strong>{{total}}</strong> ảnh.</h4>
       </div>
       {% endif %}
       {% if item == 0 %}
       <div class="col-md-8" style="margin-bottom: 1rem">
-        Không tìm thấy ảnh nào của bạn. Bạn có thể tìm ảnh theo khuôn mặt.
+        <h4> Không tìm thấy ảnh nào của bạn. Bạn có thể tìm ảnh theo khuôn mặt.</h4>
       </div>
       {% else %}
       {% if count != 0 %}
       <div class="col-md-8" style="margin-bottom: 1rem;">
-        Có <strong>{{count}}</strong> ảnh của bạn, trong tổng số
-        <strong>{{total}}</strong> ảnh.
+        <h4>Có <strong>{{count}}</strong> ảnh của bạn, trong tổng số
+          <strong>{{total}}</strong> ảnh.
+        </h4>
       </div>
       {% endif %}
       {% endif %}
 
-      
+
       <div class="col-md-4">
         <nav aria-label="Page navigation">
           <ul class="pagination" style="float: right">

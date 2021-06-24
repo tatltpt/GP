@@ -1290,6 +1290,29 @@
 <div class="main-content">
   <div class="races">
     <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{category}}">
+        <span class="closebtn">&times;</span>
+        <strong>{{ message }}</strong>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <script>
+        var close = document.getElementsByClassName("closebtn");
+        var i;
+
+        for (i = 0; i < close.length; i++) {
+          close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+          }
+        }
+      </script>
+
       <div class="box-wrapper">
         <style>
           .search-form .form-control,
@@ -1374,11 +1397,47 @@
 
                   </div>
                 </a>
-                {% if current_user.is_anonymous == False and current_user.id == user.id%}
-                <div>
-                  <div>Edit</div>
-                  <div>Delete</div>
+                {% if current_user.is_anonymous == False %}
+                {% if current_user.id == res['user_id'] %}
+                <div style="float: right; display:flex; margin-top: 20px; margin-bottom: 10px;">
+                  <div
+                    style="width: 60px; height: 20px; background-color: #337ab7; border-radius: 5px; margin-right: 20px; text-align: center;">
+                    <a style="color: #fff;" href="/update_event/{{res['slug']}}/">Edit</a>
+                  </div>
+                  <div>
+                    <div type="button"
+                      style="width: 60px; height: 20px; background-color: #e62929; border-radius: 5px; margin-right: 20px; text-align: center; color:#fff"
+                      data-toggle="modal" data-target="#exampleModalCenter{{res['slug']}}">
+                      <b>Delete</b>
+                    </div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModalCenter{{res['slug']}}">
+                      <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title" id="exampleModalLongTitle{{res['slug']}}">Xác nhận</h1>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body" style="text-align: center;">
+                            <h2>Xóa sự kiện {{res['eventname']}}</h2>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <div style="margin-top: 11px;">
+                              <form action="/delete_event/{{res['slug']}}/" method="post">
+                                <input type="submit" value="Delete" class="btn btn-danger">
+                              </form>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+                {% endif %}
                 {% endif %}
               </div>
             </div>
@@ -1390,4 +1449,5 @@
   </div>
 </div>
 </body>
+
 {% endblock content %}

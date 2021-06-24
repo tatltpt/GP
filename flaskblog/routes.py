@@ -32,6 +32,7 @@ import h5py
 from collections import OrderedDict
 import math
 import base64
+from datetime import datetime
 
 app.config['ALLOWED_EXTENSIONS'] = set(
     ['png', 'jpg', 'jpeg'])
@@ -410,6 +411,7 @@ def bib_predict(id):
 #         bib_predict()
 #     return render_template('admin/bib_predict.html')
 
+
 def save_features_img(id):
     features_face = []
     face_paths = []
@@ -465,6 +467,7 @@ def save_features_img(id):
         index_annoy(features2, file_name='body.ann')
     flash('Lấy đặc trưng thành công', 'success')
 
+
 @app.route("/album_manager", methods=['GET', 'POST'])
 @login_required
 def show_list():
@@ -478,7 +481,7 @@ def predict(id):
     if request.method == 'POST':
         album = Album.query.filter_by(id=id).first()
         bib_predict(album.id)
-        if album.status == 1: 
+        if album.status == 1:
             album.status = 2
         else:
             album.status = 4
@@ -497,6 +500,7 @@ def getFeatures(id):
             album.status = 4
         db.session.commit()
         return redirect(url_for('show_list'))
+
 
 @app.route("/get_feature", methods=['GET', 'POST'])
 # @login_required
@@ -634,7 +638,8 @@ def detail(slug):
         if "img" in request.files:
             st = time.time()
             uploaded_file = request.files["img"]
-            uploaded_file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
+            uploaded_file_path = os.path.join(
+                UPLOAD_DIR, uploaded_file.filename)
             print("uploaded_file_path", uploaded_file_path)
             uploaded_file.save(uploaded_file_path)
             print(uploaded_file_path)
@@ -657,10 +662,6 @@ def detail(slug):
     return render_template('detail.html', images=images.items, event=event, q=(images.next_num-1)*per_page, total=total, slug=slug, next_url=next_url, prev_url=prev_url, count=count, indexs_all=indexs_all, check=check)
 
 
-def not_found():
-    return render_template('404.html')
-
-
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/events")
 # @login_required
@@ -675,6 +676,11 @@ def events():
                     search) | Event.description.like(search)).all()
                 res = []
                 for event in events:
+                    if Album.query.filter(Album.event_id.in_([event.id])).first():
+                        image = Image.query.filter(
+                            Image.album_id.in_([Album.query.filter(Album.event_id.in_([event.id])).first().id])).first()
+                        event.cover_img = image.image_url
+                        db.session.commit()
                     r = {
                         'eventname': event.eventname,
                         'date': event.date,
@@ -682,28 +688,77 @@ def events():
                         'description': event.description,
                         'image': event.cover_img,
                         'slug': event.slug,
+                        'user_id': event.user_id
                     }
                     res.append(r)
-                    print('===========', r)
                 return render_template('events.html', title='events', res=res, q=q)
     events = Event.query.filter().all()
     res = []
     for event in events:
-        uploaded_file_path = event.cover_img
-        print('===========', event.cover_img)
-        if event.id > 5:
-            #uploaded_file_path = os.path.join(UPLOAD_DIR, event.cover_img)
-            print('===========', event.id)
+        if Album.query.filter(Album.event_id.in_([event.id])).first():
+            image = Image.query.filter(
+                Image.album_id.in_([Album.query.filter(Album.event_id.in_([event.id])).first().id])).first()
+            event.cover_img = image.image_url
+            db.session.commit()
         r = {
             'eventname': event.eventname,
             'date': event.date,
             'place': event.place,
             'description': event.description,
-            'image': uploaded_file_path,
+            'image': event.cover_img,
             'slug': event.slug,
+            'user_id': event.user_id
         }
         res.append(r)
-        print('===========', r)
+    return render_template('events.html', title='events', res=res)
+
+
+@app.route("/events_user")
+@login_required
+def events_user():
+    if request.method == "GET":
+        if(request.args):
+            if "q" in request.args.keys():
+                q = request.args.get('q')
+                search = "%{}%".format(q)
+                events = Event.query.filter(and_(Event.user_id == current_user.id, or_(Event.eventname.like(search), Event.place.like(
+                    search), Event.description.like(search)))).all()
+                res = []
+                for event in events:
+                    if Album.query.filter(Album.event_id.in_([event.id])).first():
+                        image = Image.query.filter(
+                            Image.album_id.in_([Album.query.filter(Album.event_id.in_([event.id])).first().id])).first()
+                        event.cover_img = image.image_url
+                        db.session.commit()
+                    r = {
+                        'eventname': event.eventname,
+                        'date': event.date,
+                        'place': event.place,
+                        'description': event.description,
+                        'image': event.cover_img,
+                        'slug': event.slug,
+                        'user_id': event.user_id
+                    }
+                    res.append(r)
+                return render_template('events.html', title='events', res=res, q=q)
+    events = Event.query.filter(Event.user_id == current_user.id).all()
+    res = []
+    for event in events:
+        if Album.query.filter(Album.event_id.in_([event.id])).first():
+            image = Image.query.filter(
+                Image.album_id.in_([Album.query.filter(Album.event_id.in_([event.id])).first().id])).first()
+            event.cover_img = image.image_url
+            db.session.commit()
+        r = {
+            'eventname': event.eventname,
+            'date': event.date,
+            'place': event.place,
+            'description': event.description,
+            'image': event.cover_img,
+            'slug': event.slug,
+            'user_id': event.user_id
+        }
+        res.append(r)
     return render_template('events.html', title='events', res=res)
 
 
@@ -738,36 +793,50 @@ def register():
 def create_event():
     form = EventForm()
     if form.validate_on_submit():
-        
+
         event = Event(eventname=form.eventname.data, date=form.date.data, place=form.place.data,
                       description=form.description.data, slug=slugify(form.eventname.data), status=0, user_id=current_user.id, cover_img=cover_default)
         db.session.add(event)
         db.session.commit()
         flash('Tạo sự kiện thành công', 'success')
         return redirect(url_for('create_event'))
-    
+
     return render_template('create_event.html', title='create_event', form=form)
 
 
 @app.route("/update_event/<string:slug>/", methods=['GET', 'POST'])
 @login_required
 def update_event(slug):
-    form = EventForm()
+    form = EventFormUpdate()
     event = Event.query.filter_by(slug=slug).first()
     form.eventname.data = event.eventname
     form.date.data = event.date
     form.place.data = event.place
     form.description.data = event.description
     if form.validate_on_submit():
-
-        event = Event(eventname=form.eventname.data, date=form.date.data, place=form.place.data,
-                      description=form.description.data, slug=slugify(form.eventname.data), status=0, user_id=current_user.id, cover_img=cover_default)
-        db.session.add(event)
+        event.eventname = request.form['eventname']
+        event.place = request.form['place']
+        event.description = request.form['description']
+        date = datetime.strptime(request.form['date'], '%d-%m-%Y')
+        event.date = date
         db.session.commit()
         flash('Sửa sự kiện thành công', 'success')
-        return redirect(url_for('create_event'))
+        return redirect(url_for('events'))
 
-    return render_template('create_event.html', title='upload_event', form=form)
+    return render_template('update_event.html', title='upload_event', form=form)
+
+
+@app.route("/delete_event/<string:slug>/", methods=['GET', 'POST'])
+@login_required
+def delete_event(slug):
+    if request.method == 'POST':
+        event = Event.query.filter_by(slug=slug).first()
+        db.session.delete(event)
+        db.session.commit()
+        flash('Xóa sự kiện thành công', 'success')
+        return redirect(url_for('events'))
+    return redirect(url_for('events'))
+
 
 @app.route("/create_album", methods=['GET', 'POST'])
 @login_required

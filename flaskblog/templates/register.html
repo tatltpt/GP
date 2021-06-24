@@ -14,8 +14,70 @@
   <title>EXAS</title>
   {% endif %}
 </head>
+<style>
+  .alert {
+    padding: 20px;
+    color: white;
+    opacity: 1;
+    transition: opacity 0.6s;
+    margin-bottom: 15px;
+  }
+
+  .alert.error {
+    background-color: #f44336 !important;
+  }
+
+  .alert.success {
+    background-color: #04AA6D !important;
+  }
+
+  .alert.info {
+    background-color: #2196F3 !important;
+  }
+
+  .alert.warning {
+    background-color: #ff9800 !important;
+  }
+
+  .closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .closebtn:hover {
+    color: black;
+  }
+</style>
 
 <body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{category}}">
+    <span class="closebtn">&times;</span>
+    <strong>{{ message }}</strong>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  <script>
+    var close = document.getElementsByClassName("closebtn");
+    var i;
+
+    for (i = 0; i < close.length; i++) {
+      close[i].onclick = function () {
+        var div = this.parentElement;
+        div.style.opacity = "0";
+        setTimeout(function () { div.style.display = "none"; }, 600);
+      }
+    }
+  </script>
   <div id="register-page">
     <div class="register">
       <h2 class="login-title">

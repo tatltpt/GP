@@ -18,9 +18,10 @@
   }
 
   input[type=text],
-  select {
+  textarea,
+  input[type=date] {
     width: 100%;
-    padding: 12px 10px;
+    padding: 12px 20px;
     margin: 8px 0;
     display: inline-block;
     border: 1px solid #ccc;
@@ -69,30 +70,38 @@
       }
     }
   </script>
+
   <div class="container" id="search-result">
     <div style="text-align: center;">
-      <h1>Thêm đường dẫn album</h1>
+      <h1> Cập nhật sự kiện</h1>
     </div>
-    <form method="POST" action="">
+    <form action="" method="post" enctype="multipart/form-data">
       {{ form.hidden_tag() }}
+      <div style="display: flex;" class="row">
+        {{form.eventname.label }}<br>
+        {{ form.eventname(size=32) }}<br>
+        {% for error in form.eventname.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+      </div>
+  </div>
+  <div style="display: flex;" class="row">
+    <div class="col-lg-6">
+      <div>{{ form.date.label }}</div>
+      {{ form.date(class='datepicker') }}
+    </div>
+    <div class="col-lg-6">
+      <div>{{ form.place.label }}</div>
+      {{ form.place(size=32) }}
+    </div>
+  </div>
 
-      <p>
-        {{ form.event.label }}<br>
-        {{ form.event }}<br>
-      </p>
-      <p>
-        {{ form.albumname.label }}<br>
-        {{ form.albumname }}<br>
-      </p>
 
-      <p>
-        {{ form.album_url.label }}<br>
-        {{ form.album_url }}<br>
-      </p>
-      {{ form.submit }}
-
-    </form>
+  {{ form.description.label }}<br>
+  {{ form.description }}<br>
+  </div>
+  {{ form.submit() }}
+  </form>
   </div>
 </main>
-
 {% endblock content %}

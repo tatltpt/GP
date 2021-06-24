@@ -47,6 +47,17 @@ class EventForm(FlaskForm):
     submit = SubmitField('Thêm sự kiện')
 
 
+class EventFormUpdate(FlaskForm):
+    eventname = StringField('Tên sự kiện', validators=[
+                            DataRequired(), Length(min=2, max=40)])
+    date = DateField('Thời gian', format='%d-%m-%Y', default=datetime.today)
+    place = StringField('Địa điểm')
+    description = StringField('Mô tả', widget=TextArea())
+    cover_img = FileField('Thêm ảnh cover cho sự kiện', validators=[
+                          FileAllowed(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])])
+    submit = SubmitField('Cập nhật')
+
+
 class AlbumForm(FlaskForm):
     event = QuerySelectField('Sự kiện', query_factory=lambda: Event.query.all(
     ), allow_blank=True, get_label="eventname")
