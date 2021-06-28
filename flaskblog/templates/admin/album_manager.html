@@ -7,7 +7,7 @@
     color: #3b3b3b;
     -webkit-font-smoothing: antialiased;
     font-smoothing: antialiased;
-    background: #c7c3c3;
+    /* background: #c7c3c3; */
   }
 
   @media screen and (max-width: 580px) {
@@ -58,6 +58,14 @@
   .row.blue {
     background: #2980b9;
   }
+  .w3-button{
+    width: 30%;
+    height: 30px;
+    background-color: #2980b9;
+    border-radius: 5px;
+    border: #2980b9;
+    color: white;
+  }
 
   @media screen and (max-width: 580px) {
     .row {
@@ -90,7 +98,9 @@
       display: block;
     }
   }
-
+  .city{
+    padding: 40px;
+  }
   .cell {
     padding: 6px 12px;
     display: table-cell;
@@ -145,6 +155,16 @@
     margin-right: 5px;
   }
 </style>
+<script>
+  function openCity(cityName) {
+    var i;
+    var x = document.getElementsByClassName("city");
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";  
+    }
+    document.getElementById(cityName).style.display = "block";  
+  }
+</script>
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 {% for category, message in messages %}
@@ -155,75 +175,128 @@
 {% endfor %}
 {% endif %}
 {% endwith %}
+<div>
+  <div class="w3-bar w3-black" style="padding-left: 40px;">
+    <button class="w3-bar-item w3-button" onclick="openCity('Paris')">Kiểm tra album</button>
+    <button class="w3-bar-item w3-button" onclick="openCity('Tokyo')">Quản lý người dùng</button>
+  </div>
 
-<div class="table">
-
-  <div class="row header blue">
-    <div class="cell">
-      Tên album
-    </div>
-    <div class="cell">
-      Link album
-    </div>
-    <div class="cell">
-      Trạng thái
-    </div>
-    <div class="cell">
-      Thao tác
+  <div id="Paris" class="w3-container city" style="display:block">
+    <div class="table">
+      <div class="row header blue">
+        <div class="cell">
+          Tên album
+        </div>
+        <div class="cell">
+          Link album
+        </div>
+        <div class="cell">
+          Trạng thái
+        </div>
+        <div class="cell">
+          Thao tác
+        </div>
+      </div>
+      {% for album in albums %}
+      <div class="row">
+    
+        <div class="cell" data-title="Tên album">
+          {{album.albumname}}
+        </div>
+        <div class="cell" data-title="Link album">
+          <a href="{{album.album_url}}" target="_blank" rel="noopener noreferrer">{{album.album_url}}</a>
+        </div>
+        <div class="cell" data-title="Trạng thái">
+          {% if album.status == 0 %}
+          Chưa crawl
+          {% elif album.status == 1%}
+          Chưa đọc BIB<br>
+          Chưa trích chọn đặc trưng
+          {% elif album.status == 2%}
+          Đã đọc BIB<br>
+          Chưa trích chọn đặc trưng
+          {% elif album.status == 3%}
+          Chưa đọc BIB<br>
+          Đã trích chọn đặc trưng
+          {% elif album.status == 4%}
+          Đã đọc BIB<br>
+          Đã trích chọn đặc trưng
+          {% endif %}
+        </div>
+        <div class="cell" data-title="Thao tác">
+          {% if album.status == 0 %}
+          <form method="post" action="/crawl_image/{{album.id}}">
+            <button type="submit" name="crawl_image" value="crawl_image"> Lưu link ảnh </button>
+          </form>
+          {% elif album.status == 1 %}
+          <form method="post" action="/bib_predict/{{album.id}}" class="inline">
+            <button type="submit" name="bib_predict" value="bib_predict"> Đọc BIB </button>
+          </form>
+          <form method="post" action="/get_feature/{{album.id}}" class="inline">
+            <button type="submit" name="getFeatures" value="getFeatures"> Lưu đặc trưng </button>
+          </form>
+          {% elif album.status == 2 %}
+          <form method="post" action="/get_feature/{{album.id}}">
+            <button type="submit" name="getFeatures" value="getFeatures"> Lưu đặc trưng </button>
+          </form>
+          {% elif album.status == 3 %}
+          <form method="post" action="/bib_predict/{{album.id}}" class="inline">
+            <button type="submit" name="bib_predict" value="bib_predict"> Đọc BIB </button>
+          </form>
+          {% endif %}
+        </div>
+    
+      </div>
+      {% endfor %}
     </div>
   </div>
-  {% for album in albums %}
-  <div class="row">
-
-    <div class="cell" data-title="Tên album">
-      {{album.albumname}}
+  
+  <div id="Tokyo" class="w3-container city" style="display:none">
+    <div class="table">
+      <div class="row header blue">
+        <div class="cell">
+          Tên người dùng
+        </div>
+        <div class="cell">
+          username
+        </div>
+        <div class="cell">
+          email
+        </div>
+        <div class="cell">
+          Trạng thái
+        </div>
+      </div>
+      {% for user in users %}
+      <div class="row">
+        {% if user.role == 1 %}
+        <div class="cell" data-title="Tên người dùng">
+          {{user.name}}
+        </div>
+        <div class="cell" data-title="username">
+          {{user.username}}
+        </div>
+        <div class="cell" data-title="email">
+          {{user.email}}
+        </div>
+        <div class="cell" data-title="Trạng thái">
+          {% if user.status == 0 %}
+          <form method="post" action="/lock/{{user.id}}">
+            <button type="submit" name="lock" value="lock">Lock</button>
+          </form>
+          {% elif user.status == 1 %}
+          <form method="post" action="/lock/{{user.id}}" class="inline">
+            <button type="submit" name="lock" value="lock">Unlock</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
     </div>
-    <div class="cell" data-title="Link album">
-      <a href="{{album.album_url}}" target="_blank" rel="noopener noreferrer">{{album.album_url}}</a>
-    </div>
-    <div class="cell" data-title="Trạng thái">
-      {% if album.status == 0 %}
-      Chưa crawl
-      {% elif album.status == 1%}
-      Chưa đọc BIB<br>
-      Chưa trích chọn đặc trưng
-      {% elif album.status == 2%}
-      Đã đọc BIB<br>
-      Chưa trích chọn đặc trưng
-      {% elif album.status == 3%}
-      Chưa đọc BIB<br>
-      Đã trích chọn đặc trưng
-      {% elif album.status == 4%}
-      Đã đọc BIB<br>
-      Đã trích chọn đặc trưng
-      {% endif %}
-    </div>
-    <div class="cell" data-title="Thao tác">
-      {% if album.status == 0 %}
-      <form method="post" action="/crawl_image/{{album.id}}">
-        <button type="submit" name="crawl_image" value="crawl_image"> Lưu link ảnh </button>
-      </form>
-      {% elif album.status == 1 %}
-      <form method="post" action="/bib_predict/{{album.id}}" class="inline">
-        <button type="submit" name="bib_predict" value="bib_predict"> Đọc BIB </button>
-      </form>
-      <form method="post" action="/get_feature/{{album.id}}" class="inline">
-        <button type="submit" name="getFeatures" value="getFeatures"> Lưu đặc trưng </button>
-      </form>
-      {% elif album.status == 2 %}
-      <form method="post" action="/get_feature/{{album.id}}">
-        <button type="submit" name="getFeatures" value="getFeatures"> Lưu đặc trưng </button>
-      </form>
-      {% elif album.status == 3 %}
-      <form method="post" action="/bib_predict/{{album.id}}" class="inline">
-        <button type="submit" name="bib_predict" value="bib_predict"> Đọc BIB </button>
-      </form>
-      {% endif %}
-    </div>
-
   </div>
-  {% endfor %}
 </div>
+
 
 <script>
   var close = document.getElementsByClassName("closebtn");

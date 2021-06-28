@@ -473,7 +473,8 @@ def save_features_img(id):
 def show_list():
     if request.method == 'GET':
         albums = Album.query.filter().order_by(Album.id.desc())
-    return render_template('admin/album_manager.html', albums=albums)
+        users = User.query.filter().all()
+    return render_template('admin/album_manager.html', albums=albums, users=users)
 
 
 @app.route("/bib_predict/<id>", methods=['GET', 'POST'])
@@ -501,6 +502,17 @@ def getFeatures(id):
         db.session.commit()
         return redirect(url_for('show_list'))
 
+@app.route("/lock/<id>", methods=['GET', 'POST'])
+def lock(id):
+    if request.method == 'POST':
+        user = User.query.filter_by(id=id).first()
+        
+        if user.status == 1:
+            user.status = 0
+        else:
+            user.status = 1
+        db.session.commit()
+        return redirect(url_for('show_list'))
 
 @app.route("/get_feature", methods=['GET', 'POST'])
 # @login_required
