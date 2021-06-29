@@ -58,7 +58,8 @@
   .row.blue {
     background: #2980b9;
   }
-  .w3-button{
+
+  .w3-button {
     width: 30%;
     height: 30px;
     background-color: #2980b9;
@@ -98,9 +99,11 @@
       display: block;
     }
   }
-  .city{
+
+  .city {
     padding: 40px;
   }
+
   .cell {
     padding: 6px 12px;
     display: table-cell;
@@ -160,9 +163,9 @@
     var i;
     var x = document.getElementsByClassName("city");
     for (i = 0; i < x.length; i++) {
-      x[i].style.display = "none";  
+      x[i].style.display = "none";
     }
-    document.getElementById(cityName).style.display = "block";  
+    document.getElementById(cityName).style.display = "block";
   }
 </script>
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -177,7 +180,7 @@
 {% endwith %}
 <div>
   <div class="w3-bar w3-black" style="padding-left: 40px;">
-    <button class="w3-bar-item w3-button" onclick="openCity('Paris')">Kiểm tra album</button>
+    <button class="w3-bar-item w3-button" onclick="openCity('Paris')">Quản lý album</button>
     <button class="w3-bar-item w3-button" onclick="openCity('Tokyo')">Quản lý người dùng</button>
   </div>
 
@@ -199,7 +202,7 @@
       </div>
       {% for album in albums %}
       <div class="row">
-    
+
         <div class="cell" data-title="Tên album">
           {{album.albumname}}
         </div>
@@ -245,12 +248,12 @@
           </form>
           {% endif %}
         </div>
-    
+
       </div>
       {% endfor %}
     </div>
   </div>
-  
+
   <div id="Tokyo" class="w3-container city" style="display:none">
     <div class="table">
       <div class="row header blue">
@@ -282,11 +285,11 @@
         <div class="cell" data-title="Trạng thái">
           {% if user.status == 0 %}
           <form method="post" action="/lock/{{user.id}}">
-            <button type="submit" name="lock" value="lock">Lock</button>
+            <button type="submit" name="lock" value="lock">Không hoạt động</button>
           </form>
           {% elif user.status == 1 %}
           <form method="post" action="/lock/{{user.id}}" class="inline">
-            <button type="submit" name="lock" value="lock">Unlock</button>
+            <button type="submit" name="lock" value="lock">Hoạt động</button>
           </form>
           {% endif %}
         </div>
