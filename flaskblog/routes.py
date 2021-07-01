@@ -388,6 +388,7 @@ def bib_predict(id):
     images = Image.query.filter(Image.album_id == id).all()
     for image in images:
         if bool(Bib.query.filter_by(image_id=image.id).first()) == False:
+            print(image.image_url)
             image_url = [keras_ocr.tools.read(image.image_url)]
             predictions = pipeline.recognize(image_url)
             for idx, prediction in enumerate(predictions):
@@ -403,13 +404,6 @@ def bib_predict(id):
             image.status = 1
             db.session.commit()
     flash('Đọc số BIB thành công', 'success')
-
-# @app.route("/bib_predict", methods=['GET', 'POST'])
-# # @login_required
-# def predict():
-#     if request.method == 'POST':
-#         bib_predict()
-#     return render_template('admin/bib_predict.html')
 
 
 def save_features_img(id):
@@ -513,7 +507,7 @@ def show_list():
     if request.method == 'GET':
         albums = Album.query.filter().order_by(Album.id.desc())
         users = User.query.filter().all()
-    return render_template('admin/album_manager.html', albums=albums, users=users)
+    return render_template('admin/admin_page.html', albums=albums, users=users)
 
 
 @app.route("/bib_predict/<id>", methods=['GET', 'POST'])
@@ -541,17 +535,19 @@ def getFeatures(id):
         db.session.commit()
         return redirect(url_for('show_list'))
 
+
 @app.route("/lock/<id>", methods=['GET', 'POST'])
 def lock(id):
     if request.method == 'POST':
         user = User.query.filter_by(id=id).first()
-        
+
         if user.status == 1:
             user.status = 0
         else:
             user.status = 1
         db.session.commit()
         return redirect(url_for('show_list'))
+
 
 @app.route("/get_feature", methods=['GET', 'POST'])
 # @login_required
@@ -614,40 +610,6 @@ def save_feature():
     return render_template('admin/get_feature.html')
 
 
-# @app.route("/", methods=['GET', 'POST'])
-# @login_required
-# def home():
-#     if request.method == "GET":
-#         if(request.args):
-#             if "bib" in request.args.keys():
-#                 bib = request.args.get('bib')
-#                 search = "%{}%".format(bib)
-#                 albums = Album.query.filter(Album.event_id == 4).all()
-#                 event = Event.query.filter_by(id=4).first()
-#                 images = Image.query.join(Bib).filter(Image.album_id.in_(
-#                     [p.id for p in albums]), Bib.bib_feature.like(search)).all()
-#                 count = Image.query.join(Bib).filter(Image.album_id.in_(
-#                     [p.id for p in albums]), Bib.bib_feature.like(search)).count()
-#                 total = Image.query.filter(
-#                     Image.album_id.in_([p.id for p in albums])).count()
-#                 return render_template('home.html', images=images, event=event, count=count, bib=bib, total=total)
-#     albums = Album.query.filter(Album.event_id == 4).all()
-#     images = Image.query.filter(
-#         Image.album_id.in_([p.id for p in albums])).all()
-#     event = Event.query.filter_by(id=4).first()
-#     total = Image.query.filter(
-#         Image.album_id.in_([p.id for p in albums])).count()
-#     if request.method == "POST":
-#         if "img" in request.files:
-#             uploaded_file = request.files["img"]
-#             uploaded_file_path = os.path.join(
-#                 UPLOAD_DIR, uploaded_file.filename)
-#             uploaded_file.save(uploaded_file_path)
-#             uploaded_file_path
-
-#     return render_template('home.html', images=images, event=event, count=total, total=total)
-
-
 @app.route("/events/<string:slug>/", methods=['GET', 'POST'])
 def detail(slug):
     if request.method == "GET":
@@ -701,13 +663,6 @@ def detail(slug):
             t = end - st
             check = 1
             return render_template('detail.html', indexs=indexs, indexs_all=indexs_all, len1=len1, len2=len2, t=t, f=f, images=images.items, event=event, q=(images.next_num-1)*per_page, total=total, slug=slug, check=check, next_url=next_url,    prev_url=prev_url)
-    # if request.method == "POST":
-    #     if "img" in request.files:
-    #         uploaded_file = request.files["img"]
-    #         uploaded_file_path = os.path.join(
-    #             UPLOAD_DIR, uploaded_file.filename)
-    #         uploaded_file.save(uploaded_file_path)
-    #         uploaded_file_path
     count = 0
     check = 0
     return render_template('detail.html', images=images.items, event=event, q=(images.next_num-1)*per_page, total=total, slug=slug, next_url=next_url, prev_url=prev_url, count=count, indexs_all=indexs_all, check=check)
