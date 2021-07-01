@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.25, for Linux (x86_64)
 --
--- Host: localhost    Database: gp
+-- Host: localhost    Database: gp4
 -- ------------------------------------------------------
--- Server version	8.0.25-0ubuntu0.20.04.1
+-- Server version	8.0.25
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -109,7 +109,7 @@ CREATE TABLE `event` (
 
 LOCK TABLES `event` WRITE;
 /*!40000 ALTER TABLE `event` DISABLE KEYS */;
-INSERT INTO `event` VALUES (1,'Vietnam Trail Marathon 2021','2021-04-24 00:00:00','Mộc Châu','Trải nghiệm Vietnam Trail Marathon và khám phá những cung đường mòn nguyên sơ, chinh phục xa hơn những con đường cũ cùng chúng tôi.',0,1,'2021-05-28 11:06:30','2021-05-28 11:06:30','vietnam-trail-marathon-2021','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/9338/img_9998.jpg'),(2,'Ecopark Marathon 2021','2021-04-10 00:00:00','Khu đô thị Ecopark','Nổi bật với cung đường bao quanh bởi màu xanh mướt của trăm ngàn cây cỏ, uốn lượn theo hồ nước mát lành, xuyên giữa thiên nhiên thoáng đạt, EPM đã tạo nên thương hiệu chạy giữa miền xanh thu hút sự quan tâm và ủng hộ của cộng đồng yêu chạy bộ, các gia đình và doanh nghiệp.\nECOPARK MARATHON tổ chức định kỳ mỗi năm một lần vào đúng dịp Giỗ tổ Hùng Vương mang đến những trải nghiệm vô cùng thú vị và độc đáo.',0,1,'2021-05-28 11:08:46','2021-05-28 11:08:46','ecopark-marathon-2021','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/9314/eq7a4394.jpg'),(3,'Techcombank Marathon 2021','2021-03-28 00:00:00','Hà Nội','Thành phố Hà Nội, thủ đô duy nhất của đất nước Việt Nam, sẽ được giới thiệu đến những người đam mê thể thao trong nước và quốc tế thông qua Giải Hà Nội Marathon Techcombank lần đầu tiên.\n\nSự kiện sẽ bắt đầu với “Phố Marathon”, nơi diễn ra hàng loạt các hoạt động vui chơi giải trí và trải nghiệm dành cho cộng đồng thể thao cũng như mọi thành viên trong gia đình bao gồm các khu hội chợ sôi động với nhiều gian hàng thể thao đa dạng, trình diễn nhạc sống, đặc biệt, các buổi chia sẻ chuyên sâu về dinh dưỡng, kỹ thuật tập luyện marathon. ',0,2,'2021-05-28 11:09:13','2021-05-28 11:09:13','techcombank-marathon-2021','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/9238/img_4102.jpg'),(4,'Tien Phong Marathon 2021','2021-03-28 00:00:00','Pleiku, Gia Lai','Giải vô địch quốc gia Marathon và cự ly dài báo Tiền Phong (Tiền Phong Marathon) là giải đấu đỉnh cao có tuổi đời lâu nhất trong làng thể thao Việt Nam, được tổ chức lần đầu tiên vào năm 1958 tại Hà Nội. Đây là một giải đấu hàng đầu, đã được đưa vào hệ thống thi đấu của điền kinh Việt Nam trong suốt nửa thế kỷ qua, được tổ chức cuối tháng 3 hằng năm.\n\nTiền Phong Marathon quy tụ những VĐV xuất sắc nhất của điền kinh Việt Nam ở các cự ly trung bình và dài tranh tài giành huy chương quốc gia, cũng là cơ hội để các VĐV phong trào tranh tài trên cùng một đường đua với các VĐV hàng đầu quốc gia.',0,1,'2021-05-28 11:09:37','2021-05-28 11:09:37','tien-phong-marathon-2021','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/9058/img_4215.jpg'),(5,'Halong Bay Heritage Marathon 2020','2020-11-22 00:00:00','Hạ Long, Quảng Ninh','Là giải chạy thực hiện hầu hết trên đường bằng với điểm đặc biệt nhất là đường dốc lên cầu Bãi Cháy, Halong Bay Heritage Marathon được thiết kế nhằm giúp cho VĐV tham gia có thể trải nghiệm vẻ đẹp toàn cảnh của vịnh với hàng trăm hòn đảo thiên hình vạn trạng qua từng bước chạy, được khám phá những làng chài đẹp mê hồn dọc theo bờ vịnh và vỡ òa trong hạnh phúc khi chinh phục cây cầu dây văng một nhịp phá vỡ kỷ lục Đông Nam Á, nơi có thể chụp những bức ảnh tuyệt đẹp với phong cảnh vừa hùng vĩ vừa nên thơ của Hạ Long.',0,1,'2021-05-28 11:09:37','2021-05-28 11:09:37','halong-bay-heritage-marathon-2020','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/8650/img_5120.jpg'),(12,'Giai chay bach dang','2021-06-24 00:00:00','Hà Nội','chay ven song',0,4,'2021-06-24 08:07:56','2021-06-24 08:07:56','giai-chay-bach-dang','/static/imgs/event-default.jpg');
+INSERT INTO `event` VALUES (1,'Vietnam Trail Marathon 2021','2021-04-24 00:00:00','Mộc Châu','Trải nghiệm Vietnam Trail Marathon và khám phá những cung đường mòn nguyên sơ, chinh phục xa hơn những con đường cũ cùng chúng tôi.',0,1,'2021-05-28 11:06:30','2021-05-28 11:06:30','vietnam-trail-marathon-2021','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/9338/img_9998.jpg'),(2,'Ecopark Marathon 2021','2021-04-10 00:00:00','Khu đô thị Ecopark','Nổi bật với cung đường bao quanh bởi màu xanh mướt của trăm ngàn cây cỏ, uốn lượn theo hồ nước mát lành, xuyên giữa thiên nhiên thoáng đạt, EPM đã tạo nên thương hiệu chạy giữa miền xanh thu hút sự quan tâm và ủng hộ của cộng đồng yêu chạy bộ, các gia đình và doanh nghiệp.\nECOPARK MARATHON tổ chức định kỳ mỗi năm một lần vào đúng dịp Giỗ tổ Hùng Vương mang đến những trải nghiệm vô cùng thú vị và độc đáo.',0,1,'2021-05-28 11:08:46','2021-05-28 11:08:46','ecopark-marathon-2021','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/9315/img_7073.jpg'),(3,'Techcombank Marathon 2021','2021-03-28 00:00:00','Hà Nội','Thành phố Hà Nội, thủ đô duy nhất của đất nước Việt Nam, sẽ được giới thiệu đến những người đam mê thể thao trong nước và quốc tế thông qua Giải Hà Nội Marathon Techcombank lần đầu tiên.\n\nSự kiện sẽ bắt đầu với “Phố Marathon”, nơi diễn ra hàng loạt các hoạt động vui chơi giải trí và trải nghiệm dành cho cộng đồng thể thao cũng như mọi thành viên trong gia đình bao gồm các khu hội chợ sôi động với nhiều gian hàng thể thao đa dạng, trình diễn nhạc sống, đặc biệt, các buổi chia sẻ chuyên sâu về dinh dưỡng, kỹ thuật tập luyện marathon. ',0,2,'2021-05-28 11:09:13','2021-05-28 11:09:13','techcombank-marathon-2021','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/9238/img_4100.jpg'),(4,'Tien Phong Marathon 2021','2021-03-28 00:00:00','Pleiku, Gia Lai','Giải vô địch quốc gia Marathon và cự ly dài báo Tiền Phong (Tiền Phong Marathon) là giải đấu đỉnh cao có tuổi đời lâu nhất trong làng thể thao Việt Nam, được tổ chức lần đầu tiên vào năm 1958 tại Hà Nội. Đây là một giải đấu hàng đầu, đã được đưa vào hệ thống thi đấu của điền kinh Việt Nam trong suốt nửa thế kỷ qua, được tổ chức cuối tháng 3 hằng năm.\n\nTiền Phong Marathon quy tụ những VĐV xuất sắc nhất của điền kinh Việt Nam ở các cự ly trung bình và dài tranh tài giành huy chương quốc gia, cũng là cơ hội để các VĐV phong trào tranh tài trên cùng một đường đua với các VĐV hàng đầu quốc gia.',0,1,'2021-05-28 11:09:37','2021-05-28 11:09:37','tien-phong-marathon-2021','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/9058/img_4224.jpg'),(5,'Halong Bay Heritage Marathon 2020','2020-11-22 00:00:00','Hạ Long, Quảng Ninh','Là giải chạy thực hiện hầu hết trên đường bằng với điểm đặc biệt nhất là đường dốc lên cầu Bãi Cháy, Halong Bay Heritage Marathon được thiết kế nhằm giúp cho VĐV tham gia có thể trải nghiệm vẻ đẹp toàn cảnh của vịnh với hàng trăm hòn đảo thiên hình vạn trạng qua từng bước chạy, được khám phá những làng chài đẹp mê hồn dọc theo bờ vịnh và vỡ òa trong hạnh phúc khi chinh phục cây cầu dây văng một nhịp phá vỡ kỷ lục Đông Nam Á, nơi có thể chụp những bức ảnh tuyệt đẹp với phong cảnh vừa hùng vĩ vừa nên thơ của Hạ Long.',0,1,'2021-05-28 11:09:37','2021-05-28 11:09:37','halong-bay-heritage-marathon-2020','https://storage.googleapis.com/cdn.nhanh.vn/store1/43017/album/8650/img_5120.jpg'),(12,'Giai chay bach dang','2021-06-24 00:00:00','Hà Nội','chay ven song',0,4,'2021-06-24 08:07:56','2021-06-24 08:07:56','giai-chay-bach-dang','/static/imgs/event-default.jpg');
 /*!40000 ALTER TABLE `event` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -122,12 +122,8 @@ DROP TABLE IF EXISTS `feature`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `feature` (
   `id` int NOT NULL AUTO_INCREMENT,
-  -- `body_coordinate` varchar(1000) DEFAULT NULL,
   `body_feature` varchar(2000) DEFAULT NULL,
-  -- `head_coordinate` varchar(1000) DEFAULT NULL,
   `head_feature` varchar(2000) DEFAULT NULL,
-  -- `upper_coordinate` varchar(1000) DEFAULT NULL,
-  -- `upper_feature` varchar(2000) DEFAULT NULL,
   `head_index` varchar(2000) DEFAULT NULL,
   `body_index` varchar(2000) DEFAULT NULL,
   `event_id` int NOT NULL,
@@ -136,7 +132,7 @@ CREATE TABLE `feature` (
   PRIMARY KEY (`id`),
   KEY `event_id` (`event_id`),
   CONSTRAINT `feature_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `event` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -145,6 +141,7 @@ CREATE TABLE `feature` (
 
 LOCK TABLES `feature` WRITE;
 /*!40000 ALTER TABLE `feature` DISABLE KEYS */;
+INSERT INTO `feature` VALUES (1,'body4.h5','face4.h5','face4.ann','body4.ann',4,'2021-06-29 00:00:00','2021-06-29 00:00:00');
 /*!40000 ALTER TABLE `feature` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -225,4 +222,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-06-24 15:39:21
+-- Dump completed on 2021-07-01 17:51:22
