@@ -45,6 +45,7 @@ class Event(db.Model):
                            default=datetime.utcnow)
     cover_img = db.Column(db.String(255), nullable=False)
     albums = relationship("Album")
+    features = relationship("Feature")
 
     def __repr__(self):
         return f"Event('{self.id}', '{self.eventname}', '{self.place}', '{self.description}', '{self.status}', '{self.slug}', '{self.user_id}', '{self.created_at}', '{self.updated_at}', '{self.cover_img}')"
@@ -77,7 +78,7 @@ class Image(db.Model):
                            default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
-    features = relationship("Feature")
+    # features = relationship("Feature")
     bibs = relationship("Bib")
 
     def __repr__(self):
@@ -85,21 +86,19 @@ class Image(db.Model):
 
 
 class Feature(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    body_coordinate = db.Column(db.String(1000), nullable=True)
+    id = db.Column(db.Integer, primary_key=True)    
     body_feature = db.Column(db.String(2000), nullable=True)
-    head_coordinate = db.Column(db.String(1000), nullable=True)
     head_feature = db.Column(db.String(2000), nullable=True)
-    upper_coordinate = db.Column(db.String(1000), nullable=True)
-    upper_feature = db.Column(db.String(2000), nullable=True)
-    image_id = db.Column(db.Integer, db.ForeignKey('image.id'), nullable=False)
+    body_index = db.Column(db.String(1000), nullable=True)
+    head_index = db.Column(db.String(2000), nullable=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
 
     def __repr__(self):
-        return f"Feature('{self.id}', '{self.body_coordinate}', '{self.body_feature}', '{self.head_coordinate}', '{self.head_feature}', '{self.upper_coordinate}', '{self.upper_feature}', '{self.image_id}', '{self.created_at}', '{self.updated_at}')"
+        return f"Feature('{self.id}', '{self.body_feature}', '{self.head_feature}', '{self.body_index}', '{self.head_index}', '{self.event_id}', '{self.created_at}', '{self.updated_at}')"
 
 
 class Bib(db.Model):

@@ -40,6 +40,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploaded')
 IMG_DIR = os.path.join(BASE_DIR, 'static', 'imgs')
 cover_default = '/static/imgs/event-default.jpg'
+FEATURE_DIR = os.path.join(BASE_DIR, 'static', 'files')
 
 WAITING = 0
 PROCESSING = 1
@@ -202,8 +203,7 @@ def search_feature(input_file):
             for i in range(len(inclu)):
                 if inclu[i] < 0.8:
                     print(index_img[i])
-                    path = str(image_paths[index_img[i]])[
-                        2:len(str(image_paths[index_img[i]]))-1]
+                    path = str(image_paths[index_img[i]])[2:len(str(image_paths[index_img[i]]))-1]
                     imgs.append(path)
             imgs = list(OrderedDict.fromkeys(imgs))
             images_face = images_face + imgs
@@ -413,11 +413,46 @@ def bib_predict(id):
 
 
 def save_features_img(id):
+    features, image_paths = load_features(file_name='face.h5')
+    features2, image_paths2 = load_features(file_name='body.h5')
     features_face = []
     face_paths = []
     features_body = []
     body_paths = []
+    album = Album.query.filter(Album.id == id).first()
     images = Image.query.filter(Image.album_id == id).all()
+
+    body_file = 'body' + str(album.event_id) + '.h5'
+    head_file = 'head' + str(album.event_id) + '.h5'
+
+    body_path = os.path.join(FEATURE_DIR, body_file)
+    head_path = os.path.join(FEATURE_DIR, head_file)
+
+
+    body_index = 'body' + str(album.event_id) + '.ann'
+    head_index = 'head' + str(album.event_id) + '.ann'
+
+    body_index_path = os.path.join(FEATURE_DIR, body_index)
+    head_index_path = os.path.join(FEATURE_DIR, head_index)
+
+    if bool(Feature.query.filter_by(event_id=album.event_id).first()) == True:
+        features, image_paths = load_features(file_name=head_path)
+        features2, image_paths2 = load_features(file_name=body_path)
+        print("feature", features)
+        # features_face = features_face + features
+        # face_paths = face_paths + image_paths
+        # features_body = features2
+        # body_paths = image_paths2
+
+        for i in range(len(features)):
+            features_face.append(features[i][0])
+            path = str(image_paths[i])[2:len(str(image_paths[i]))-1]
+            face_paths.append(path)
+        for i in range(len(features2)):
+            features_body.append(features2[i][0])
+            path = str(image_paths2[i])[2:len(str(image_paths2[i]))-1]
+            body_paths.append(path)
+
     for image in images:
         print(image.image_url)
         resp = urllib.request.urlopen(image.image_url)
@@ -442,33 +477,37 @@ def save_features_img(id):
                     body_paths.append(image.image_url)
                 else:
                     continue
-        with h5py.File('face.h5',  "a") as f:
-            if list(f.keys()) != []:
-                if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'image_paths':
-                    del f['features']
-                    del f['image_paths']
-            f.create_dataset('features', data=features_face)
-            f.create_dataset('image_paths', data=face_paths)
-            f.close()
+    
+    with h5py.File(head_path,  "a") as f:
+        if list(f.keys()) != []:
+            if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'image_paths':
+                del f['features']
+                del f['image_paths']
+        f.create_dataset('features', data=features_face)
+        f.create_dataset('image_paths', data=face_paths)
+        f.close()
 
-        with h5py.File('body.h5',  "a") as f:
-            if list(f.keys()) != []:
-                if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'image_paths':
-                    del f['features']
-                    del f['image_paths']
-            f.create_dataset('features', data=features_body)
-            f.create_dataset('image_paths', data=body_paths)
-            f.close()
-        features, image_paths = load_features(file_name='face.h5')
-        features2, image_paths2 = load_features(file_name='body.h5')
-        print(features[9])
-        print('path', image_paths[9])
-        index_annoy(features, file_name='face.ann')
-        index_annoy(features2, file_name='body.ann')
+    with h5py.File(body_path,  "a") as f:
+        if list(f.keys()) != []:
+            if list(f.keys())[0] == 'features' and list(f.keys())[1] == 'image_paths':
+                del f['features']
+                del f['image_paths']
+        f.create_dataset('features', data=features_body)
+        f.create_dataset('image_paths', data=body_paths)
+        f.close()
+    features, image_paths = load_features(file_name=head_path)
+    features2, image_paths2 = load_features(file_name=body_path)
+
+    index_annoy(features, file_name=head_index_path)
+    index_annoy(features2, file_name=body_index_path)
+
+    feature = Feature(body_feature=body_file, head_feature=head_file, body_index=body_index, head_index=head_index, event_id=album.event_id)
+    db.session.add(feature)
+    db.session.commit()
     flash('Lấy đặc trưng thành công', 'success')
 
 
-@app.route("/album_manager", methods=['GET', 'POST'])
+@app.route("/admin_page", methods=['GET', 'POST'])
 @login_required
 def show_list():
     if request.method == 'GET':

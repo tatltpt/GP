@@ -122,18 +122,20 @@ DROP TABLE IF EXISTS `feature`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `feature` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `body_coordinate` varchar(1000) DEFAULT NULL,
+  -- `body_coordinate` varchar(1000) DEFAULT NULL,
   `body_feature` varchar(2000) DEFAULT NULL,
-  `head_coordinate` varchar(1000) DEFAULT NULL,
+  -- `head_coordinate` varchar(1000) DEFAULT NULL,
   `head_feature` varchar(2000) DEFAULT NULL,
-  `upper_coordinate` varchar(1000) DEFAULT NULL,
-  `upper_feature` varchar(2000) DEFAULT NULL,
-  `image_id` int NOT NULL,
+  -- `upper_coordinate` varchar(1000) DEFAULT NULL,
+  -- `upper_feature` varchar(2000) DEFAULT NULL,
+  `head_index` varchar(2000) DEFAULT NULL,
+  `body_index` varchar(2000) DEFAULT NULL,
+  `event_id` int NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `image_id` (`image_id`),
-  CONSTRAINT `feature_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `image` (`id`)
+  KEY `event_id` (`event_id`),
+  CONSTRAINT `feature_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `event` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
